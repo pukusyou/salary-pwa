@@ -17,18 +17,6 @@ const WorkRecordForm = () => {
     setNominationCount(event.target.value);
   };
 
-  const handleSubmit = (event: { preventDefault: () => void; }) => {
-    event.preventDefault();
-    // ここで入力されたデータを保存する処理を実行する
-    console.log('Work time:', workTime);
-    console.log('Drink count:', drinkCount);
-    console.log('Nomination count:', nominationCount);
-    // 保存後に入力をリセットする
-    setWorkTime('');
-    setDrinkCount('');
-    setNominationCount('');
-  };
-
   return (
         <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
