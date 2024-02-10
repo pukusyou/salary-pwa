@@ -2,7 +2,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import jaLocale from '@fullcalendar/core/locales/ja'; 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import DateDrawer from './DateDrawer';
 
 

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 export default function Footer() {
-    const [value, setValue] = React.useState('recents');
     const [selectedItem, setSelectedItem] = React.useState('home');
 
 

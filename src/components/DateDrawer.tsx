@@ -1,6 +1,4 @@
-import { Box } from '@mui/material';
 import Drawer from '@mui/material/Drawer';
-import { useState } from 'react';
 import DateTime from './DateTime';
 
 function DateDrawer({ open, toggleDrawer, date }: { open: boolean, toggleDrawer: (open: boolean) => () => void, date: Date}) {
