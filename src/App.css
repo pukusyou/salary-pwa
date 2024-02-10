@@ -36,3 +36,60 @@
     transform: rotate(360deg);
   }
 }
+
+.fc .fc-col-header-cell {
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: #b6b5b3;
+  border: none;
+}
+th.fc-day-sat .fc-col-header-cell-cushion {
+  color: blue;
+}
+th.fc-day-sun .fc-col-header-cell-cushion{
+  color: red;
+}
+td.fc-day-sat {
+  color: blue;
+  background-color: #eaf4ff;
+}
+td.fc-day-sun {
+  color: red;
+  background-color: #ffeaea;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0;
+  height: 7%;
+}
+.fc .fc-toolbar-title {
+  font-size: 1.5rem;
+  color: #37362f;
+}
+.fc .fc-button-primary {
+  font-size: 1.0rem;
+  background-color: #ffffff00;
+  color: #acaba9;
+  border: none;
+  outline: none;
+}
+.fc .fc-today-button {
+  background-color: #ffffff00;
+  color: #37362f;
+  border: none;
+  outline: none;
+}
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #ffffff00;
+  color: #acaba9;
+  box-shadow: none;
+}
+.fc .fc-button-primary:not(:disabled):focus,
+.fc .fc-button-primary:not(:disabled).fc-button-focus {
+  background-color: #ffffff00;
+  color: #acaba9;
+  box-shadow: none;
+}
+.fc .fc-today-button:disabled {
+  opacity: 1;
+}
