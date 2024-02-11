@@ -13,12 +13,11 @@ function Calendar() {
     {},
   ]);
   const toggleDrawer = (open: boolean) => () => {
-    console.log(events);
     setOpen(open);
   }
   const dateClick = (info: any) => {
-    console.log(info);
     setDate(info.date);
+    console.log(info.date);
     setOpen(true);
   }
   const addEvents = (start: Date, end: Date, title: string, description: string, bgcolor: string) => {
