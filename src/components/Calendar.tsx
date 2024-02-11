@@ -9,21 +9,25 @@ import DateDrawer from './DateDrawer';
 function Calendar() {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [events, setEvents] = useState([
+    {},
+  ]);
   const toggleDrawer = (open: boolean) => () => {
-    console.log(open);
+    console.log(events);
     setOpen(open);
   }
   const dateClick = (info: any) => {
     console.log(info);
-    setOpen(true);
     setDate(info.date);
+    setOpen(true);
+  }
+  const addEvents = (start: Date, end: Date, title: string, description: string, bgcolor: string) => {
+    setEvents([...events, {start: start, end: end, allDay: true, title: title, description: description, color: bgcolor}]);
   }
   return (
     <>
-      {/* <StyleWeapper style={{height: "100%"}}> */}
-        <FullCalendar plugins={[dayGridPlugin, interactionPlugin]} locales={[jaLocale]} locale='ja' dateClick={dateClick} height={"92%"}/>
-      {/* </StyleWeapper> */}
-      <DateDrawer open={open} toggleDrawer={toggleDrawer} date={date}/>
+      <FullCalendar plugins={[dayGridPlugin, interactionPlugin]} locales={[jaLocale]} locale='ja' dateClick={dateClick} height={"92%"} events={events}/>
+      <DateDrawer open={open} toggleDrawer={toggleDrawer} date={date} addEvents={addEvents}/>
     </>
   );
 }
