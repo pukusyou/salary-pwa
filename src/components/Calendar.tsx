@@ -57,7 +57,6 @@ function Calendar() {
   };
   const dateClick = (info: any) => {
     setDate(info.date);
-    console.log(info.date);
     setOpen(true);
   };
   useEffect(() => {

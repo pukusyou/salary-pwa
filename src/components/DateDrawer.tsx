@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import drinkDB from "../scripts/drinksDB";
 import eventDB from "../scripts/eventsDB";
+import { Breakdown } from "./Breakdown";
 interface Drink {
   name: string;
   price: number;
@@ -48,7 +49,6 @@ async function getDrinksName() {
 async function boolEvent(date: Date) {
   var result: boolean = false;
   var eventList: EventList[] = await loadEventIndexedDB();
-  console.log(eventList);
   for (var key in eventList) {
     var startDate: Date = new Date(eventList[key].start);
     if (
@@ -58,7 +58,6 @@ async function boolEvent(date: Date) {
       result = true;
     }
   }
-  console.log(result);
   return result;
 }
 
@@ -88,7 +87,6 @@ const DateDrawer = ({
   const [startTime, setStartTime] = useState(date);
   const [endTime, setEndTime] = useState(date);
   const [drinkCounts, setDrinkCounts] = useState<DrinkNames[]>([]);
-  console.log(drinkCounts);
   useEffect(() => {
     setStartTime(date);
     setEndTime(date);
@@ -105,7 +103,6 @@ const DateDrawer = ({
   useEffect(() => {
     const fetchIsEvent = async () => {
       boolEvent(date).then((result) => {
-        console.log(typeof result);
         setIsEvent(result);
       });
     };
@@ -125,24 +122,19 @@ const DateDrawer = ({
       return count;
     });
     setDrinkCounts(updatedCounts);
-    console.log(updatedCounts);
   };
 
   // 新しいドリンク数と価格を追加する関数
 
   const handleSubmit = async () => {
-    // var currentEventList: EventList[] = await loadEventIndexedDB()
-    // var updateEvents: EventList[] = [...currentEventList, datas];
-    // localStorage.setItem(EVENTS, JSON.stringify(updateEvents));
     var drinkData: EventDrinks[] = [];
     for (let key in drinkCounts) {
       if (drinkCounts[key].value > 0) {
-        drinkDB.getDrinksRecord(drinkCounts[key].name).then((result: any) => {
-          drinkData.push({
-            name: drinkCounts[key].name,
-            price: result.price,
-            value: drinkCounts[key].value,
-          });
+        const result = await drinkDB.getDrinksRecord(drinkCounts[key].name);
+        drinkData.push({
+          name: drinkCounts[key].name,
+          price: result.price,
+          value: drinkCounts[key].value,
         });
       }
     }
@@ -164,27 +156,7 @@ const DateDrawer = ({
         <div className="relative bg-white rounded-lg p-8 max-w-md w-full">
           {isEvenst ? (
             <>
-              <div className="flex justify-center items-center flex-col">
-                <div className="text-2xl font-bold">￥5,000</div>
-                <div className="mt-4">
-                  <h2 className="text-xl font-semibold mb-2">内訳:</h2>
-                  <ul>
-                    {drinks.map((drink, index) => (
-                      <li
-                        key={index}
-                        className="flex justify-between px-4 py-2"
-                      >
-                        <span>{drink.name}</span>
-                        <span className="ps-8">{drink.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-4">
-                  <h2 className="text-xl font-semibold">働いた時間帯:</h2>
-                  <p>10</p>
-                </div>
-              </div>
+              <Breakdown startDate={date} />
             </>
           ) : (
             <>
