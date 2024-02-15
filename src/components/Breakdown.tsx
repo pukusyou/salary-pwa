@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import eventDB from "../scripts/eventsDB";
 
 const hw = 1000;

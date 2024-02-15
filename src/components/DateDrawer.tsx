@@ -108,11 +108,6 @@ const DateDrawer = ({
     };
     fetchIsEvent();
   }, [date]);
-  const drinks = [
-    { name: "コーラ", count: 2 },
-    { name: "オレンジジュース", count: 3 },
-    { name: "コーヒー", count: 1 },
-  ];
   // ドリンク数と価格の変更を処理する関数
   const handleDrinkCountChange = (name: string, value: number) => {
     const updatedCounts = drinkCounts.map((count) => {
