@@ -62,24 +62,45 @@ const DrinkList: React.FC = () => {
   return (
     <div className="max-w-md mx-auto mt-8">
       {drinks.map((drink, index) => (
-        <div key={index} className="flex items-center space-x-4 mb-4">
-          <input
-            type="text"
-            placeholder="名称"
-            value={drink.name}
-            onChange={(e) => handleChange(index, e, "name")}
-            className="border rounded px-2 py-1 flex-1 w-1"
-          />
-          <input
-            type="number"
-            placeholder="値段"
-            value={drink.price}
-            onChange={(e) => handleChange(index, e, "price")}
-            className="border rounded px-2 py-1 flex-1 w-1/2"
-          />
+        <div
+          key={index}
+          className="flex items-center space-x-4 mb-4 bg-white rounded-lg shadow-md p-4"
+        >
+          <div className="flex flex-col flex-1">
+            <label
+              htmlFor={`drinkName-${index}`}
+              className="text-sm font-medium text-gray-700"
+            >
+              名称
+            </label>
+            <input
+              type="text"
+              id={`drinkName-${index}`}
+              placeholder="名称"
+              value={drink.name}
+              onChange={(e) => handleChange(index, e, "name")}
+              className="border rounded px-3 py-2 mt-1"
+            />
+          </div>
+          <div className="flex flex-col flex-1">
+            <label
+              htmlFor={`drinkPrice-${index}`}
+              className="text-sm font-medium text-gray-700"
+            >
+              値段
+            </label>
+            <input
+              type="number"
+              id={`drinkPrice-${index}`}
+              placeholder="値段"
+              value={drink.price}
+              onChange={(e) => handleChange(index, e, "price")}
+              className="border rounded px-3 py-2 mt-1"
+            />
+          </div>
           <button
             onClick={() => handleRemoveDrink(index)}
-            className="border rounded px-2 py-1 bg-red-500 text-white"
+            className="border rounded-full px-2 py-2 bg-red-500 text-white flex items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
