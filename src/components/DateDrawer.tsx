@@ -47,7 +47,7 @@ async function getDrinksName() {
 }
 
 async function boolEvent(date: Date) {
-  var result: boolean = false;
+  var result: [boolean, Date] = [false, new Date()];
   var eventList: EventList[] = await loadEventIndexedDB();
   for (var key in eventList) {
     var startDate: Date = new Date(eventList[key].start);
@@ -55,7 +55,7 @@ async function boolEvent(date: Date) {
       date.getTime() <= startDate.getTime() &&
       date.getTime() + 24 * 60 * 60 * 1000 > startDate.getTime()
     ) {
-      result = true;
+      result = [true, startDate];
     }
   }
   return result;
@@ -87,6 +87,7 @@ const DateDrawer = ({
   const [startTime, setStartTime] = useState(date);
   const [endTime, setEndTime] = useState(date);
   const [drinkCounts, setDrinkCounts] = useState<DrinkNames[]>([]);
+  const [eventStart, setEventStart] = useState(new Date());
   useEffect(() => {
     setStartTime(date);
     setEndTime(date);
@@ -103,7 +104,8 @@ const DateDrawer = ({
   useEffect(() => {
     const fetchIsEvent = async () => {
       boolEvent(date).then((result) => {
-        setIsEvent(result);
+        setIsEvent(result[0]);
+        setEventStart(result[1]);
       });
     };
     fetchIsEvent();
@@ -151,7 +153,7 @@ const DateDrawer = ({
         <div className="relative bg-white rounded-lg p-8 max-w-md w-full">
           {isEvenst ? (
             <>
-              <Breakdown startDate={date} />
+              <Breakdown startDate={eventStart} />
             </>
           ) : (
             <>
