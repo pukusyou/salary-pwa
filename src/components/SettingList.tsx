@@ -8,7 +8,7 @@ const SettingsList = () => {
         <div className="bg-white rounded-lg overflow-hidden shadow-md">
           <div className="divide-y divide-gray-200">
             {/* 通知設定 */}
-            <Link to={"hourly"} className="block">
+            <Link to="hourly" className="block">
               <div className="p-4">
                 <h2 className="text-lg font-semibold mb-2">時給</h2>
                 <p className="text-sm text-gray-500">
@@ -17,7 +17,7 @@ const SettingsList = () => {
               </div>
             </Link>
             {/* プライバシー設定 */}
-            <Link to={"drink"} className="block">
+            <Link to="drink" className="block">
               <div className="p-4">
                 <h2 className="text-lg font-semibold mb-2">ドリンク設定</h2>
                 <p className="text-sm text-gray-500">
@@ -25,11 +25,13 @@ const SettingsList = () => {
                 </p>
               </div>
             </Link>
-            {/* Wi-Fi設定 */}
-            <Link to="/wifi" className="block">
+            {/* 締め日設定 */}
+            <Link to="cutoff" className="block">
               <div className="p-4">
-                <h2 className="text-lg font-semibold mb-2">Wi-Fi設定</h2>
-                <p className="text-sm text-gray-500">Wi-Fiの設定を変更します</p>
+                <h2 className="text-lg font-semibold mb-2">締め日</h2>
+                <p className="text-sm text-gray-500">
+                  締め日の設定を変更します
+                </p>
               </div>
             </Link>
             {/* 他の設定項目を追加 */}

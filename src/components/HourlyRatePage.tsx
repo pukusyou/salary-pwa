@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 
 const hourlyRateKey: string = "hourlyRate";
-const transportationCostKey: string = "transportationCost";
+const deductionAmountKey: string = "deductionAmount";
+const deductionUnitKey: string = "deductionUnit";
 
 function getHourlyRate() {
   var hourlyRate = localStorage.getItem(hourlyRateKey);
@@ -12,45 +13,68 @@ function getHourlyRate() {
   }
 }
 
-function getTransportationCost() {
-  var hourlyRate = localStorage.getItem(transportationCostKey);
-  if (hourlyRate) {
-    return Number(hourlyRate).toLocaleString("ja-JP");
+function getDeductionAmount() {
+  var deductionAmount = localStorage.getItem(deductionAmountKey);
+  if (deductionAmount) {
+    return Number(deductionAmount).toLocaleString("ja-JP");
   } else {
     return "";
   }
 }
 
+function getDeductionUnit() {
+  var deductionUnit = localStorage.getItem(deductionUnitKey);
+  if (deductionUnit) {
+    return deductionUnit;
+  } else {
+    return "%";
+  }
+}
+
 const HourlyRatePage = () => {
+  const [alert, setAlert] = useState(<></>);
   const [hourlyRate, setHourlyRate] = useState(getHourlyRate());
-  const [dailyTransportationCost, setDailyTransportationCost] = useState(
-    getTransportationCost()
-  );
+  const [deductionAmount, setDeductionAmount] = useState(getDeductionAmount());
+  const [deductionUnit, setDeductionUnit] = useState(getDeductionUnit());
   const handleHourlyRateChange = (e: { target: { value: any } }) => {
     const inputHourlyRate = Number(e.target.value.replace(/,/g, ""));
     // マイナスの値が入力された場合は、0に設定する
     const newHourlyRate = inputHourlyRate < 0 ? 0 : inputHourlyRate;
     localStorage.setItem(hourlyRateKey, String(newHourlyRate));
-    console.log(newHourlyRate.toLocaleString("ja-JP"));
     setHourlyRate(newHourlyRate.toLocaleString("ja-JP"));
   };
 
-  const handleDailyTransportationCostChange = (e: {
-    target: { value: any };
-  }) => {
-    const inputDailyTransportationCost = Number(
-      e.target.value.replace(/,/g, "")
-    );
+  const handleDeductionAmountChange = (e: { target: { value: any } }) => {
+    const inputDeductionAmount = Number(e.target.value.replace(/,/g, ""));
     // マイナスの値が入力された場合は、0に設定する
-    const newDailyTransportationCost =
-      inputDailyTransportationCost < 0 ? 0 : inputDailyTransportationCost;
-    localStorage.setItem(
-      transportationCostKey,
-      String(newDailyTransportationCost)
-    );
-    setDailyTransportationCost(
-      inputDailyTransportationCost.toLocaleString("ja-JP")
-    );
+    const newDeductionAmount =
+      inputDeductionAmount < 0 ? 0 : inputDeductionAmount;
+    localStorage.setItem(deductionAmountKey, String(newDeductionAmount));
+    setDeductionAmount(newDeductionAmount.toLocaleString("ja-JP"));
+  };
+
+  const handleDeductionUnitChange = (e: { target: { value: any } }) => {
+    localStorage.setItem(deductionUnitKey, e.target.value);
+    setDeductionUnit(e.target.value);
+  };
+
+  const handleSubmit = () => {
+    if (
+      deductionUnit === "%" &&
+      Number(deductionAmount.replace(/,/g, "")) > 100
+    ) {
+      setAlert(
+        <div className="flex text-red-700 bg-red-100 border border-red-400 rounded px-2 py-0 mt-4">
+          引かれものは100%以内で指定してください
+        </div>
+      );
+    } else {
+      setAlert(
+        <div className="flex bg-blue-100 border border-blue-500 text-blue-700 rounded px-2 py-0 mt-4">
+          保存しました
+        </div>
+      );
+    }
   };
 
   return (
@@ -76,29 +100,36 @@ const HourlyRatePage = () => {
         </div>
         <div className="mb-6">
           <label
-            htmlFor="dailyTransportationCost"
+            htmlFor="deductionAmount"
             className="block text-sm font-medium text-gray-700"
           >
-            交通費（1日）（円）
+            引かれもの
           </label>
-          <input
-            type="text"
-            id="dailyTransportationCost"
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
-            placeholder="交通費（1日）を入力してください"
-            value={dailyTransportationCost}
-            min="0" // マイナスの値を入力できないようにする
-            onChange={handleDailyTransportationCostChange}
-          />
+          <div className="flex items-center">
+            <input
+              type="text"
+              id="deductionAmount"
+              className="mt-1 block w-3/4 border-gray-300 rounded-l-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
+              placeholder="数値"
+              value={deductionAmount}
+              min="0"
+              onChange={handleDeductionAmountChange}
+            />
+            <select
+              className="mt-1 block w-1/4 border-gray-300 rounded-r-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
+              value={deductionUnit}
+              onChange={handleDeductionUnitChange}
+            >
+              <option value="%">%</option>
+              <option value="円">円</option>
+            </select>
+          </div>
+          {alert}
         </div>
         <div className="flex justify-end">
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-            onClick={() =>
-              console.log(
-                `Hourly rate set to: ${hourlyRate}, Daily transportation cost set to: ${dailyTransportationCost}`
-              )
-            }
+            onClick={handleSubmit}
           >
             設定
           </button>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import eventDB from "../scripts/eventsDB";
 
-const hw = 1000;
-
+const hourlyRateKey: string = "hourlyRate";
+const transportationCostKey: string = "transportationCost";
 interface EventList {
   start: Date;
   end: Date;
@@ -16,14 +16,56 @@ interface DrinkNames {
 }
 function calcSalary(eventData: EventList) {
   var total = 0;
+  var deductionAmount = localStorage.getItem("deductionAmount");
+  var deductionUnit = localStorage.getItem("deductionUnit");
   for (var key in eventData.drinks) {
     total += eventData.drinks[key].price * eventData.drinks[key].value;
   }
   //   時給計算
   const elapsed = eventData.end.getTime() - eventData.start.getTime();
   const elapsedHours = elapsed / (1000 * 60 * 60);
-  total += hw * elapsedHours;
+  total += Number(localStorage.getItem(hourlyRateKey)) * elapsedHours;
+  //   交通費
+  total += Number(localStorage.getItem(transportationCostKey));
+  if (deductionUnit === "%") {
+    total -= (total * Number(deductionAmount)) / 100;
+  } else {
+    total -= Number(deductionAmount);
+  }
   return total;
+}
+
+function calcPlusSalary(eventData: EventList) {
+  var total = 0;
+  for (var key in eventData.drinks) {
+    total += eventData.drinks[key].price * eventData.drinks[key].value;
+  }
+  //   時給計算
+  const elapsed = eventData.end.getTime() - eventData.start.getTime();
+  const elapsedHours = elapsed / (1000 * 60 * 60);
+  total += Number(localStorage.getItem(hourlyRateKey)) * elapsedHours;
+  //   交通費
+  total += Number(localStorage.getItem(transportationCostKey));
+  return total;
+}
+
+function getDeduction(eventData: EventList) {
+  var result: String = "";
+  var deductionAmount = localStorage.getItem("deductionAmount");
+  var deductionUnit = localStorage.getItem("deductionUnit");
+  if (deductionUnit === "%") {
+    result =
+      "-" +
+      deductionAmount +
+      "% ￥-" +
+      (
+        (calcPlusSalary(eventData) * Number(deductionAmount)) /
+        100
+      ).toLocaleString("ja-JP");
+  } else {
+    result = "- ￥" + deductionAmount;
+  }
+  return result;
 }
 
 export const Breakdown = ({ startDate }: { startDate: Date }) => {
@@ -44,13 +86,22 @@ export const Breakdown = ({ startDate }: { startDate: Date }) => {
             ￥ {calcSalary(eventData).toLocaleString("ja-JP")}
           </div>
           <div className="border-b border-gray-300 w-full"></div>
-          {/* <div className="text-lg font-semibold mt-4">合計金額:</div>
-          <div className="text-2xl font-bold mb-4">
-            ￥ {calcSalary(eventData).toLocaleString("ja-JP")}
-          </div> */}
           <div className="mt-4 w-full">
             <h2 className="text-lg font-semibold mb-2">内訳:</h2>
             <ul>
+              <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                <span>時給</span>
+                <span className="text-right">
+                  {(
+                    (eventData.end.getTime() - eventData.start.getTime()) /
+                    (1000 * 60 * 60)
+                  ).toFixed(1)}
+                  時間 x ￥
+                  {Number(localStorage.getItem(hourlyRateKey)).toLocaleString(
+                    "ja-JP"
+                  )}
+                </span>
+              </li>
               {eventData.drinks.map((drink, index) => (
                 <li
                   key={index}
@@ -62,6 +113,10 @@ export const Breakdown = ({ startDate }: { startDate: Date }) => {
                   </span>
                 </li>
               ))}
+              <li className="flex text-red-700 justify-between items-center py-2 border-b border-gray-300">
+                <span>引かれもの</span>
+                <span className="text-right">{getDeduction(eventData)}</span>
+              </li>
             </ul>
           </div>
           <div className="mt-4 w-full">
