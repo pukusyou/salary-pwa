@@ -110,6 +110,5 @@ td.fc-day-sun {
 }
 main {
   flex: 1;
-  background-color: rgba(255, 253, 237, 1);
   overflow-y: scroll;
 }

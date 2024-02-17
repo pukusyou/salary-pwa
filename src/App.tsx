@@ -14,7 +14,7 @@ function App() {
   return (
     <div className="App all">
       <Router>
-        <main>
+        <main className="bg-gray-100">
           <Routes>
             <Route path="/salary-pwa/" element={<Home />} />
             <Route path="/salary-pwa/setting/drink" element={<DrinkList />} />

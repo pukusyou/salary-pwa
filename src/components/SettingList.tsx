@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"; // react-router-dom から Link コン�
 
 const SettingsList = () => {
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
+    <div className="p-4">
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg overflow-hidden shadow-md">
           <div className="divide-y divide-gray-200">
