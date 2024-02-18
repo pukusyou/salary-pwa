@@ -74,7 +74,6 @@ export const Breakdown = ({ startDate }: { startDate: Date }) => {
     setEventData(null);
     setTimeout(() => {
       eventDB.getEventsRecord(startDate).then((result: EventList) => {
-        console.log(result);
         setEventData(result);
       });
     }, 300);

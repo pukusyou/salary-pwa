@@ -36,10 +36,7 @@ const CutoffDatePage = () => {
           </select>
         </div>
         <div className="flex justify-end">
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-            onClick={() => console.log(`Cutoff date set to: ${selectedDay}`)}
-          >
+          <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
             設定
           </button>
         </div>

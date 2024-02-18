@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import eventDB from "../scripts/eventsDB";
+import { MonthlyBreakDown } from "./MonthlyBreakDown";
 
 interface EventData {
   start: Date;
@@ -33,38 +34,67 @@ function loadEventIndexedDB(date: Date) {
   });
 }
 
+function getDeduction(salary: number) {
+  var result: number = 0;
+  var deductionAmount = localStorage.getItem("deductionAmount");
+  var deductionUnit = localStorage.getItem("deductionUnit");
+  if (deductionUnit === "%") {
+    result = (salary * Number(deductionAmount)) / 100;
+  } else {
+    result = Number(deductionAmount);
+  }
+  return Math.floor(result);
+}
+
 const MonthlySalaryPage = () => {
+  const [open, setOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(1);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [monthlyData, setMonthlyData] = useState({
     totalSalary: 0,
     totalHourlyWage: 0,
+    totalDeduction: 0,
     workingHours: 0,
     drinkSales: 0,
   });
+  const [eventData, setEventData] = useState<EventData[]>([]);
   useEffect(() => {
     loadEventIndexedDB(selectedDate).then((result: any) => {
+      setEventData(result);
       var totalSalary = 0;
       var hourlyWage = Number(localStorage.getItem("hourlyRate"));
       var workingHours = 0;
       var drinkSales = 0;
+      var totalDeduction = 0;
       var totalHourlyWage = 0;
       for (var key in result) {
+        var dailySalary = 0;
+        var dailyDrinkSales = 0;
         var elapsed =
           new Date(result[key].end).getTime() -
           new Date(result[key].start).getTime();
         var elapsedHours = elapsed / (1000 * 60 * 60);
         workingHours += elapsedHours;
         for (var key2 in result[key].drinks) {
-          drinkSales += result[key].drinks[key2].price;
+          console.log(result[key].drinks[key2]);
+          dailyDrinkSales +=
+            result[key].drinks[key2].price * result[key].drinks[key2].value;
         }
-        totalSalary += elapsedHours * hourlyWage;
+        dailySalary += elapsedHours * hourlyWage;
+        dailySalary += dailyDrinkSales;
+        var deduction = getDeduction(dailySalary);
+        totalDeduction += deduction;
+        totalSalary += dailySalary;
+        totalSalary += dailyDrinkSales;
+        totalSalary -= deduction;
+        drinkSales += dailyDrinkSales;
+        totalHourlyWage += dailySalary;
       }
-      totalSalary += drinkSales;
-      totalHourlyWage = hourlyWage * workingHours;
+      // totalHourlyWage = hourlyWage * workingHours;
       setMonthlyData({
         totalSalary: totalSalary,
         totalHourlyWage: totalHourlyWage,
+        totalDeduction: totalDeduction,
         workingHours: workingHours,
         drinkSales: drinkSales,
       });
@@ -87,7 +117,6 @@ const MonthlySalaryPage = () => {
     const newDate = new Date(selectedDate);
     if (selectedOption === 1) {
       newDate.setMonth(newDate.getMonth() - 1);
-      console.log(newDate.toLocaleDateString());
     } else {
       newDate.setFullYear(newDate.getFullYear() - 1);
     }
@@ -103,11 +132,21 @@ const MonthlySalaryPage = () => {
     }
     setSelectedDate(newDate);
   }
-
+  const handleBreakDown = () => {
+    setOpen(true);
+  };
   return (
     <div className="flex flex-col items-center p-4">
+      <MonthlyBreakDown
+        open={open}
+        setOpen={setOpen}
+        salary={monthlyData.totalSalary}
+        workTime={monthlyData.workingHours}
+        eventData={eventData}
+        deducation={monthlyData.totalDeduction}
+      />
       {/* 画面上部 */}
-      <div className="min-w-full mt-0 mb-2">
+      <div className="min-w-full mt-0 mb-2 border-2 rounded-lg border-blue-500">
         <div className="flex justify-between">
           <button
             className={`flex-1 ${
@@ -193,7 +232,7 @@ const MonthlySalaryPage = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">給与</p>
             <p className="font-semibold">
-              ￥{monthlyData.totalSalary.toLocaleString()}
+              ￥{monthlyData.totalHourlyWage.toLocaleString()}
             </p>
           </div>
           <div className="text-center">
@@ -202,9 +241,18 @@ const MonthlySalaryPage = () => {
               ￥{monthlyData.drinkSales.toLocaleString()}
             </p>
           </div>
+          <div className="text-center">
+            <p className="text-sm text-red-700">引かれもの</p>
+            <p className="font-semibold text-red-700">
+              - ￥{monthlyData.totalDeduction.toLocaleString()}
+            </p>
+          </div>
         </div>
         {/* 詳細を表示ボタン */}
-        <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+        <button
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+          onClick={handleBreakDown}
+        >
           詳細を表示
         </button>
       </div>
