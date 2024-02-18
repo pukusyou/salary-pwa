@@ -7,7 +7,8 @@ import React from "react";
 import SettingsList from "./components/SettingList";
 import HourlyRatePage from "./components/HourlyRatePage";
 import CutoffDatePage from "./components/CutoffDatePage";
-import MonthlySalaryPage from "./components/MonthlySalaryPage";
+// import MonthlySalaryPage from "./components/MonthlySalaryPage";
+import SalaryPage from "./components/SalaryPage";
 function App() {
   const [selectedItem, setSelectedItem] = React.useState("home");
 
@@ -27,7 +28,7 @@ function App() {
               path="/salary-pwa/setting/cutoff"
               element={<CutoffDatePage />}
             />
-            <Route path="/salary-pwa/salary" element={<MonthlySalaryPage />} />
+            <Route path="/salary-pwa/salary" element={<SalaryPage />} />
           </Routes>
         </main>
         <Footer selectedItem={selectedItem} setSelectedItem={setSelectedItem} />

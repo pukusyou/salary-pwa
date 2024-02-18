@@ -76,11 +76,11 @@ function toISOStringWithTimezone(date: Date): string {
 
 const DateDrawer = ({
   open,
-  toggleDrawer,
+  setOpen,
   date,
 }: {
   open: boolean;
-  toggleDrawer: Function;
+  setOpen: Function;
   date: Date;
 }) => {
   const [isEvenst, setIsEvent] = useState(true);
@@ -99,7 +99,7 @@ const DateDrawer = ({
     };
 
     fetchDrinkCounts();
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     const fetchIsEvent = async () => {
@@ -121,7 +121,10 @@ const DateDrawer = ({
     setDrinkCounts(updatedCounts);
   };
 
-  // 新しいドリンク数と価格を追加する関数
+  const handleClose = () => {
+    setDrinkCounts([]);
+    setOpen(false);
+  };
 
   const handleSubmit = async () => {
     var drinkData: EventDrinks[] = [];
@@ -136,16 +139,16 @@ const DateDrawer = ({
       }
     }
     eventDB.addEventsRecord(startTime, endTime, drinkData);
-    toggleDrawer(false)();
+    handleClose();
   };
 
   return (
     <div
-      className={`fixed z-10 inset-0 overflow-y-auto ${
+      className={`fixed z-10 inset-0 overflow-y-auto  ${
         open ? "block" : "hidden"
       }`}
     >
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
@@ -153,7 +156,11 @@ const DateDrawer = ({
         <div className="relative bg-white rounded-lg p-8 max-w-md w-full">
           {isEvenst ? (
             <>
-              <Breakdown startDate={eventStart} />
+              <Breakdown
+                startDate={eventStart}
+                setEventStart={setEventStart}
+                setDrawerOpen={setOpen}
+              />
             </>
           ) : (
             <>
@@ -225,8 +232,8 @@ const DateDrawer = ({
             </>
           )}
           <button
-            onClick={() => toggleDrawer(false)()}
-            className="absolute top-4 right-4 bg-gray-200 text-gray-700 px-2 py-1 rounded-lg"
+            onClick={handleClose}
+            className="absolute top-4 right-4 bg-gray-200 hover:bg-gray-400 text-gray-700 px-2 py-1 rounded-lg"
           >
             閉じる
           </button>

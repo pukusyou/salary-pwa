@@ -60,13 +60,13 @@ const DrinkList: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8">
+    <div className="mx-auto mt-8 max-w-screen-sm">
       {drinks.map((drink, index) => (
         <div
           key={index}
-          className="flex items-center space-x-4 mb-4 bg-white rounded-lg shadow-md p-4"
+          className="flex items-center space-x-4 mb-4 bg-white rounded-lg shadow-md p-4 "
         >
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col flex-1 w-1/3">
             <label
               htmlFor={`drinkName-${index}`}
               className="text-sm font-medium text-gray-700"
@@ -82,7 +82,7 @@ const DrinkList: React.FC = () => {
               className="border rounded px-3 py-2 mt-1"
             />
           </div>
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col flex-1 w-1/3">
             <label
               htmlFor={`drinkPrice-${index}`}
               className="text-sm font-medium text-gray-700"

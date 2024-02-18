@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 
 const CutoffDatePage = () => {
-  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedDay, setSelectedDay] = useState(
+    localStorage.getItem("cutoffDate") || "-1"
+  );
 
   const handleDayChange = (e: {
     target: { value: React.SetStateAction<string> };
   }) => {
-    localStorage.setItem("cutoffDate", String(e.target.value));
-    setSelectedDay(e.target.value);
+    if (Number(e.target.value) >= 0) {
+      localStorage.setItem("cutoffDate", String(e.target.value));
+      setSelectedDay(e.target.value);
+    }
   };
 
   return (
@@ -27,6 +31,7 @@ const CutoffDatePage = () => {
             onChange={handleDayChange}
             className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
+            <option value={-1}>選択してください</option>
             {[...Array(30)].map((_, index) => (
               <option key={index + 1} value={index + 1}>
                 {index + 1}日

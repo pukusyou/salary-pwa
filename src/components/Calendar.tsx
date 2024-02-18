@@ -52,9 +52,6 @@ function Calendar() {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState([]);
-  const toggleDrawer = (open: boolean) => () => {
-    setOpen(open);
-  };
   const dateClick = (info: any) => {
     setDate(info.date);
     setOpen(true);
@@ -74,7 +71,7 @@ function Calendar() {
         height={"92%"}
         events={events}
       />
-      <DateDrawer open={open} toggleDrawer={toggleDrawer} date={date} />
+      <DateDrawer open={open} setOpen={setOpen} date={date} />
     </>
   );
 }
