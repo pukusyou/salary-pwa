@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import eventDB from "../scripts/eventsDB";
+import drinkDB from "../scripts/drinksDB";
+import InfoAlert from "./InfoAlert";
 
 interface EventDrinks {
   name: string;
@@ -9,6 +11,12 @@ interface EventDrinks {
 
 function loadEvent(date: Date) {
   return eventDB.getEventsRecord(date).then((result: any) => {
+    return result;
+  });
+}
+
+function loadDrinkList() {
+  return drinkDB.getAllDrinksRecord().then((result: any) => {
     return result;
   });
 }
@@ -26,6 +34,14 @@ function toISOStringWithTimezone(date: Date): string {
   return `${year}-${month}-${day}T${hour}:${min}`;
 }
 
+function createOptions(options: string[], drinkCounts: EventDrinks[]) {
+  const drinkNames = drinkCounts.map((drink) => drink.name);
+  const uniqueDrinkNames = Array.from(drinkNames);
+  // options - uniqueDrinkNames
+  options = options.filter((option) => !uniqueDrinkNames.includes(option));
+  return options;
+}
+
 const EditDateDrawer = ({
   date,
   setOpen,
@@ -35,6 +51,8 @@ const EditDateDrawer = ({
   setOpen: Function;
   setNewStartDate: Function;
 }) => {
+  const [alert, setAlert] = useState(<></>);
+  const [options, setOptions] = useState<string[]>([]);
   const [startTime, setStartTime] = useState(new Date(date));
   const [endTime, setEndTime] = useState(new Date(date));
   const [drinkCounts, setDrinkCounts] = useState<EventDrinks[]>([]);
@@ -53,11 +71,18 @@ const EditDateDrawer = ({
         var drink = { name: drinkName, price: drinkPrice, value: drinkValue };
         drinkData.push(drink);
       }
+      const fetchDrinkList = async () => {
+        const drinkList = await loadDrinkList();
+        const drinkNames = drinkList.map((drink: any) => drink.name);
+        setOptions(drinkNames);
+      };
       setDrinkCounts(drinkData);
+      fetchDrinkList();
     };
 
     fetchEventData();
   }, [date]);
+
   const handleDrinkCountChange = (name: string, value: number) => {
     const updatedCounts = drinkCounts.map((count) => {
       if (count.name === name) {
@@ -82,6 +107,18 @@ const EditDateDrawer = ({
 
   const handleSubmit = async () => {
     var drinkData: EventDrinks[] = [];
+    if (startTime > endTime) {
+      setAlert(
+        <InfoAlert context="エラー" message="終了日時が開始日時より前です" />
+      );
+      return;
+    }
+    if (startTime === endTime) {
+      setAlert(
+        <InfoAlert context="エラー" message="開始日時と終了日時が同じです" />
+      );
+      return;
+    }
     for (let key in drinkCounts) {
       if (drinkCounts[key].value > 0) {
         drinkData.push({
@@ -89,6 +126,11 @@ const EditDateDrawer = ({
           price: drinkCounts[key].price,
           value: drinkCounts[key].value,
         });
+      }
+    }
+    for (let key in addDrinkList) {
+      if (addDrinkList[key].value > 0) {
+        drinkData.push(addDrinkList[key]);
       }
     }
     if (startTime === preDate) {
@@ -107,7 +149,7 @@ const EditDateDrawer = ({
 
   const handleChange = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLSelectElement>,
     field: keyof EventDrinks
   ) => {
     const newDrinks: EventDrinks[] = [...addDrinkList];
@@ -127,6 +169,24 @@ const EditDateDrawer = ({
     setAddDrinkList(newAddDrinkList);
   };
 
+  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOption = e.target.value;
+    const isOptionExist = addDrinkList.some(
+      (drink) => drink.name === selectedOption
+    );
+    setAddDrinkList([
+      ...addDrinkList.slice(0, addDrinkList.length - 1),
+      { name: selectedOption, price: 0, value: 0 },
+    ]);
+    if (!isOptionExist) {
+      setAlert(<></>);
+    } else {
+      setAlert(
+        <InfoAlert context="重複" message="同じドリンクが既に存在します" />
+      );
+    }
+  };
+
   return (
     <div className={"fixed z-10 inset-0 overflow-y-auto block"}>
       <div className="flex justify-center items-center h-screen">
@@ -136,6 +196,7 @@ const EditDateDrawer = ({
 
         <div className="relative bg-white rounded-lg p-8 max-w-md w-full">
           <>
+            {alert}
             <div className="mb-4">
               <label
                 htmlFor="startTime"
@@ -187,14 +248,19 @@ const EditDateDrawer = ({
                     className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
                   />
                   <span className="mx-2">x</span>
-                  <input
-                    type="number"
+                  <select
                     value={drink.value}
                     onChange={(e) =>
                       handleDrinkCountChange(drink.name, Number(e.target.value))
                     }
                     className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/5"
-                  />
+                  >
+                    {Array.from({ length: 100 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               ))}
               {addDrinkList.map((drink, index) => (
@@ -209,30 +275,22 @@ const EditDateDrawer = ({
                     >
                       名称
                     </label>
-                    <input
-                      type="text"
-                      id={`drinkName-${index}`}
-                      placeholder="名称"
+                    <select
+                      id="options"
+                      name="options"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       value={drink.name}
-                      className="border rounded px-3 py-2 mt-1"
-                      onChange={(e) => handleChange(index, e, "name")}
-                    />
-                  </div>
-                  <div className="flex flex-col flex-1 w-1/3">
-                    <label
-                      htmlFor={`drinkPrice-${index}`}
-                      className="text-sm font-medium text-gray-700"
+                      onChange={handleOptionChange}
                     >
-                      値段
-                    </label>
-                    <input
-                      type="number"
-                      id={`drinkPrice-${index}`}
-                      placeholder="値段"
-                      value={drink.price}
-                      className="border rounded px-3 py-2 mt-1"
-                      onChange={(e) => handleChange(index, e, "price")}
-                    />
+                      <option value="">選択</option>
+                      {createOptions(options, drinkCounts).map(
+                        (option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        )
+                      )}
+                    </select>
                   </div>
                   <div className="flex flex-col flex-1 w-1/4">
                     <label
@@ -241,14 +299,18 @@ const EditDateDrawer = ({
                     >
                       個数
                     </label>
-                    <input
-                      type="number"
+                    <select
                       id={`drinkValue-${index}`}
-                      placeholder="個数"
                       value={drink.value}
                       className="border rounded px-3 py-2 mt-1"
                       onChange={(e) => handleChange(index, e, "value")}
-                    />
+                    >
+                      {Array.from({ length: 100 }, (_, i) => i).map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <button
                     onClick={() => handleRemoveDrink(drink.name)}

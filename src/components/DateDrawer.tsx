@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import drinkDB from "../scripts/drinksDB";
 import eventDB from "../scripts/eventsDB";
 import { Breakdown } from "./Breakdown";
+import InfoAlert from "./InfoAlert";
 interface Drink {
   name: string;
   price: number;
@@ -83,6 +84,7 @@ const DateDrawer = ({
   setOpen: Function;
   date: Date;
 }) => {
+  const [alert, setAlert] = useState(<></>);
   const [isEvenst, setIsEvent] = useState(true);
   const [startTime, setStartTime] = useState(date);
   const [endTime, setEndTime] = useState(date);
@@ -99,6 +101,7 @@ const DateDrawer = ({
     };
 
     fetchDrinkCounts();
+    setAlert(<></>);
   }, [open]);
 
   useEffect(() => {
@@ -128,6 +131,24 @@ const DateDrawer = ({
 
   const handleSubmit = async () => {
     var drinkData: EventDrinks[] = [];
+    if (startTime >= endTime) {
+      setAlert(
+        <InfoAlert
+          context="エラー"
+          message="開始日時が終了日時より後または同じになっています"
+        />
+      );
+      return;
+    }
+    if (Number(endTime) - Number(startTime) > 24 * 60 * 60 * 1000) {
+      setAlert(
+        <InfoAlert
+          context="エラー"
+          message="働いた時間が24時間を超えています"
+        />
+      );
+      return;
+    }
     for (let key in drinkCounts) {
       if (drinkCounts[key].value > 0) {
         const result = await drinkDB.getDrinksRecord(drinkCounts[key].name);
@@ -165,6 +186,7 @@ const DateDrawer = ({
           ) : (
             <>
               <div className="mb-4">
+                {alert}
                 <label
                   htmlFor="startTime"
                   className="block text-gray-700 font-bold mb-2"
@@ -203,11 +225,13 @@ const DateDrawer = ({
                   ドリンク数と価格:
                 </label>
                 {drinkCounts.map((drink, index) => (
-                  <div key={drink.name} className="flex items-center mb-2">
-                    <h1>{drink.name}</h1>
+                  <div
+                    key={drink.name}
+                    className="flex items-center justify-between mb-2"
+                  >
+                    <h1 className="flex-grow">{drink.name}</h1>
                     <span className="mx-2">x</span>
-                    <input
-                      type="number"
+                    <select
                       value={drink.value}
                       onChange={(e) =>
                         handleDrinkCountChange(
@@ -215,10 +239,38 @@ const DateDrawer = ({
                           Number(e.target.value)
                         )
                       }
-                      className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    />
+                      className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                    >
+                      {Array.from({ length: 100 }, (_, i) => (
+                        <option key={i} value={i}>
+                          {i}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 ))}
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="drinkCount"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  指名:
+                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <h1 className="flex-grow">本指名</h1>
+                  <span className="mx-2">x</span>
+                  <select
+                    value="本指名"
+                    className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                  >
+                    {Array.from({ length: 100 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="flex justify-center">
                 <button
