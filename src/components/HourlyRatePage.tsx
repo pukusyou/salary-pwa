@@ -51,6 +51,7 @@ const HourlyRatePage = () => {
       deductionAmountPercentKey,
       String(deductionAmountPercent)
     );
+    localStorage.setItem(hourlyRateKey, hourlyRate.replace(/,/g, ""));
     localStorage.setItem(bookNominationKey, String(bookNomination));
     localStorage.setItem(hallNominationKey, String(hallNomination));
   };
