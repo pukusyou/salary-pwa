@@ -3,6 +3,7 @@ import drinkDB from "../scripts/drinksDB";
 import eventDB from "../scripts/eventsDB";
 import { Breakdown } from "./Breakdown";
 import InfoAlert from "./InfoAlert";
+import { useCount } from "../scripts/customhooks";
 interface Drink {
   name: string;
   price: number;
@@ -90,6 +91,15 @@ const DateDrawer = ({
   const [endTime, setEndTime] = useState(date);
   const [drinkCounts, setDrinkCounts] = useState<DrinkNames[]>([]);
   const [eventStart, setEventStart] = useState(new Date());
+  const {
+    count: bookNominationCount,
+    handleCountChange: handleBookNominationCountChange,
+  } = useCount(0);
+  const {
+    count: hallNominationCount,
+    handleCountChange: handleHallNominationCountChange,
+  } = useCount(0);
+
   useEffect(() => {
     setStartTime(date);
     setEndTime(date);
@@ -98,6 +108,8 @@ const DateDrawer = ({
     const fetchDrinkCounts = async () => {
       const drinks = await getDrinksName();
       setDrinkCounts(drinks);
+      // handleBookNominationCountChange(0);
+      // handleHallNominationCountChange(0);
     };
 
     fetchDrinkCounts();
@@ -159,7 +171,14 @@ const DateDrawer = ({
         });
       }
     }
-    eventDB.addEventsRecord(startTime, endTime, drinkData);
+    console.log(typeof bookNominationCount);
+    eventDB.addEventsRecord(
+      startTime,
+      endTime,
+      drinkData,
+      bookNominationCount,
+      hallNominationCount
+    );
     handleClose();
   };
 
@@ -261,8 +280,28 @@ const DateDrawer = ({
                   <h1 className="flex-grow">本指名</h1>
                   <span className="mx-2">x</span>
                   <select
-                    value="本指名"
+                    value={bookNominationCount}
                     className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                    onChange={(e) =>
+                      handleBookNominationCountChange(Number(e.target.value))
+                    }
+                  >
+                    {Array.from({ length: 100 }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h1 className="flex-grow">場内指名</h1>
+                  <span className="mx-2">x</span>
+                  <select
+                    value={hallNominationCount}
+                    className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                    onChange={(e) =>
+                      handleHallNominationCountChange(Number(e.target.value))
+                    }
                   >
                     {Array.from({ length: 100 }, (_, i) => (
                       <option key={i} value={i}>

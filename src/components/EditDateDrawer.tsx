@@ -57,12 +57,16 @@ const EditDateDrawer = ({
   const [endTime, setEndTime] = useState(new Date(date));
   const [drinkCounts, setDrinkCounts] = useState<EventDrinks[]>([]);
   const [addDrinkList, setAddDrinkList] = useState<EventDrinks[]>([]);
+  const [bookNominationCount, setBookNomination] = useState(0);
+  const [hallNominationCount, setHallNomination] = useState(0);
   const preDate: Date = new Date(date);
   useEffect(() => {
     const fetchEventData = async () => {
       const eventData = await loadEvent(date);
       setStartTime(eventData.start);
       setEndTime(eventData.end);
+      setBookNomination(eventData.bookNomination);
+      setHallNomination(eventData.hallNomination);
       const drinkData: EventDrinks[] = [];
       for (var key in eventData.drinks) {
         var drinkName = eventData.drinks[key].name;
@@ -134,10 +138,22 @@ const EditDateDrawer = ({
       }
     }
     if (startTime === preDate) {
-      eventDB.putEventsRecord(startTime, endTime, drinkData);
+      eventDB.putEventsRecord(
+        startTime,
+        endTime,
+        drinkData,
+        bookNominationCount,
+        hallNominationCount
+      );
     } else {
       eventDB.deleteEventsRecord(preDate);
-      eventDB.addEventsRecord(startTime, endTime, drinkData);
+      eventDB.addEventsRecord(
+        startTime,
+        endTime,
+        drinkData,
+        bookNominationCount,
+        hallNominationCount
+      );
     }
     setNewStartDate(startTime);
     setOpen(false);
@@ -352,6 +368,44 @@ const EditDateDrawer = ({
                   />
                 </svg>
               </button>
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="drinkCount"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                指名:
+              </label>
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="flex-grow">本指名</h1>
+                <span className="mx-2">x</span>
+                <select
+                  value={bookNominationCount}
+                  className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                  onChange={(e) => setBookNomination(Number(e.target.value))}
+                >
+                  {Array.from({ length: 100 }, (_, i) => (
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="flex-grow">場内指名</h1>
+                <span className="mx-2">x</span>
+                <select
+                  value={hallNominationCount}
+                  className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
+                  onChange={(e) => setHallNomination(Number(e.target.value))}
+                >
+                  {Array.from({ length: 100 }, (_, i) => (
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex justify-center">
               <button

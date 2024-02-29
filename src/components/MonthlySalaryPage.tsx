@@ -11,8 +11,13 @@ interface EventData {
     name: string;
     price: number;
     value: number;
+    bookNomination: number;
+    hallNomination: number;
   }[];
 }
+const deductionAmountYenKey: string = "deductionAmountYen";
+const deductionAmountPercentKey: string = "deductionAmountPercent";
+const deductionAmountOptionKey: string = "deductionAmountOption";
 
 function loadEventIndexedDB(date: Date) {
   var monthlyEventData: EventData[] = [];
@@ -36,6 +41,7 @@ function loadEventIndexedDB(date: Date) {
       var startDate: Date = new Date(result[key].start);
       if (startDate > oneMonthAgo && startDate <= endDate) {
         monthlyEventData.push(result[key]);
+        console.log(result[key]);
       }
     }
     return monthlyEventData;
@@ -44,12 +50,17 @@ function loadEventIndexedDB(date: Date) {
 
 function getDeduction(salary: number) {
   var result: number = 0;
-  var deductionAmount = localStorage.getItem("deductionAmount");
-  var deductionUnit = localStorage.getItem("deductionUnit");
-  if (deductionUnit === "%") {
-    result = (salary * Number(deductionAmount)) / 100;
+  var deductionAmountYen = localStorage.getItem(deductionAmountYenKey);
+  var deductionAmountPercent = localStorage.getItem(deductionAmountPercentKey);
+  var deductionAmountOption = localStorage.getItem(deductionAmountOptionKey);
+  if (deductionAmountOption === "0") {
+    result = (salary * Number(deductionAmountPercent)) / 100;
+  } else if (deductionAmountOption === "1") {
+    result = Number(deductionAmountYen);
   } else {
-    result = Number(deductionAmount);
+    result =
+      (salary * Number(deductionAmountPercent)) / 100 +
+      Number(deductionAmountYen);
   }
   return Math.floor(result);
 }
@@ -63,6 +74,9 @@ const MonthlySalaryPage = () => {
     totalDeduction: 0,
     workingHours: 0,
     drinkSales: 0,
+    totalNomination: 0,
+    totalBookNomination: 0,
+    totalHallNomination: 0,
   });
   const [eventData, setEventData] = useState<EventData[]>([]);
   useEffect(() => {
@@ -70,13 +84,20 @@ const MonthlySalaryPage = () => {
       setEventData(result);
       var totalSalary = 0;
       var hourlyWage = Number(localStorage.getItem("hourlyRate"));
+      let bookNomination = Number(localStorage.getItem("bookNomination"));
+      let hallNomination = Number(localStorage.getItem("hallNomination"));
       var workingHours = 0;
       var drinkSales = 0;
       var totalDeduction = 0;
       var totalHourlyWage = 0;
+      var totalNomination = 0;
+      var totalBookNomination = 0;
+      var totalHallNomination = 0;
       for (var key in result) {
         var dailySalary = 0;
+        var dailyNomination = 0;
         var dailyDrinkSales = 0;
+        console.log(result[key]);
         var elapsed =
           new Date(result[key].end).getTime() -
           new Date(result[key].start).getTime();
@@ -86,15 +107,23 @@ const MonthlySalaryPage = () => {
           dailyDrinkSales +=
             result[key].drinks[key2].price * result[key].drinks[key2].value;
         }
+        dailyNomination += result[key].bookNomination * bookNomination;
+        dailyNomination += result[key].hallNomination * hallNomination;
+        totalBookNomination += result[key].bookNomination;
+        totalHallNomination += result[key].hallNomination;
+        console.log(totalBookNomination);
+        dailySalary += dailyNomination;
         dailySalary += elapsedHours * hourlyWage;
         dailySalary += dailyDrinkSales;
         var deduction = getDeduction(dailySalary);
         totalDeduction += deduction;
         totalSalary += dailySalary;
         totalSalary -= deduction;
+        totalNomination += dailyNomination;
         drinkSales += dailyDrinkSales;
         totalHourlyWage += elapsedHours * hourlyWage;
       }
+
       // totalHourlyWage = hourlyWage * workingHours;
       setMonthlyData({
         totalSalary: totalSalary,
@@ -102,18 +131,25 @@ const MonthlySalaryPage = () => {
         totalDeduction: totalDeduction,
         workingHours: workingHours,
         drinkSales: drinkSales,
+        totalNomination: totalNomination,
+        totalBookNomination: totalBookNomination,
+        totalHallNomination: totalHallNomination,
       });
     });
   }, [selectedDate]);
 
   // 円グラフのデータ
   const chartData = {
-    labels: ["時給", "ドリンク"],
+    labels: ["時給", "ドリンク", "指名"],
     datasets: [
       {
-        data: [monthlyData.totalHourlyWage, monthlyData.drinkSales],
-        backgroundColor: ["#FF6384", "#36A2EB"],
-        hoverBackgroundColor: ["#FF6384", "#36A2EB"],
+        data: [
+          monthlyData.totalHourlyWage,
+          monthlyData.drinkSales,
+          monthlyData.totalNomination,
+        ],
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
     ],
   };
@@ -142,6 +178,8 @@ const MonthlySalaryPage = () => {
         workTime={monthlyData.workingHours}
         eventData={eventData}
         deducation={monthlyData.totalDeduction}
+        bookNomination={monthlyData.totalBookNomination}
+        hallNomination={monthlyData.totalHallNomination}
       />
       <div className="flex items-center mr-4">
         <button
@@ -214,11 +252,17 @@ const MonthlySalaryPage = () => {
             </p>
           </div>
           <div className="text-center">
+            <p className="text-sm text-gray-600">指名料</p>
+            <p className="font-semibold">
+              ￥{monthlyData.totalNomination.toLocaleString()}
+            </p>
+          </div>
+          {/* <div className="text-center">
             <p className="text-sm text-red-500">引かれもの</p>
             <p className="font-semibold text-red-700">
               - ￥{monthlyData.totalDeduction.toLocaleString()}
             </p>
-          </div>
+          </div> */}
         </div>
         {/* 詳細を表示ボタン */}
         <button

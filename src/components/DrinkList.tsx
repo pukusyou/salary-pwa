@@ -87,12 +87,12 @@ const DrinkList: React.FC = () => {
               htmlFor={`drinkPrice-${index}`}
               className="text-sm font-medium text-gray-700"
             >
-              値段
+              バック(円)
             </label>
             <input
               type="number"
               id={`drinkPrice-${index}`}
-              placeholder="値段"
+              placeholder="バック"
               value={drink.price}
               onChange={(e) => handleChange(index, e, "price")}
               className="border rounded px-3 py-2 mt-1"

@@ -41,6 +41,8 @@ export const MonthlyBreakDown = ({
   workTime,
   eventData,
   deducation,
+  bookNomination,
+  hallNomination,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -48,6 +50,8 @@ export const MonthlyBreakDown = ({
   workTime: number;
   eventData: EventList[];
   deducation: number;
+  bookNomination: number;
+  hallNomination: number;
 }) => {
   const toggleDrawer = (open: boolean) => () => {
     setOpen(open);
@@ -81,6 +85,20 @@ export const MonthlyBreakDown = ({
                       {Number(
                         localStorage.getItem(hourlyRateKey)
                       ).toLocaleString("ja-JP")}
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                    <span>本指名</span>
+                    <span className="text-right">
+                      {bookNomination} x ￥
+                      {localStorage.getItem("bookNomination")}
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                    <span>場内指名</span>
+                    <span className="text-right">
+                      {hallNomination} x ￥
+                      {localStorage.getItem("hallNomination")}
                     </span>
                   </li>
                   {getDrinkList(eventData).map((drink, index) => (

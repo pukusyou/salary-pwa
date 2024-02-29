@@ -15,7 +15,9 @@ class EventsDB {
   private constructor(databaseName: string) {
     this.db = new Dexie(databaseName);
     if (!(events in this.db)) {
-      this.db.version(1).stores({ Events: "&start, end, drinks" });
+      this.db.version(1).stores({
+        Events: "&start, end, drinks, bookNomination, hallNomination",
+      });
     }
   }
 
@@ -29,17 +31,37 @@ class EventsDB {
   async addEventsRecord(
     start: Date,
     end: Date,
-    drinks: Drinks[]
+    drinks: Drinks[],
+    bookNomination: number,
+    hallNomination: number
   ): Promise<void> {
-    await this.db.table(events).add({ start: start, end: end, drinks: drinks });
+    await this.db
+      .table(events)
+      .add({
+        start: start,
+        end: end,
+        drinks: drinks,
+        bookNomination: bookNomination,
+        hallNomination: hallNomination,
+      });
   }
 
   async putEventsRecord(
     start: Date,
     end: Date,
-    drinks: Drinks[]
+    drinks: Drinks[],
+    bookNomination: number,
+    hallNomination: number
   ): Promise<void> {
-    await this.db.table(events).put({ start: start, end: end, drinks: drinks });
+    await this.db
+      .table(events)
+      .put({
+        start: start,
+        end: end,
+        drinks: drinks,
+        bookNomination: bookNomination,
+        hallNomination: hallNomination,
+      });
   }
 
   async deleteEventsRecord(start: Date): Promise<void> {
