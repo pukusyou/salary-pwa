@@ -9,6 +9,7 @@ import HourlyRatePage from "./components/HourlyRatePage";
 import CutoffDatePage from "./components/CutoffDatePage";
 // import MonthlySalaryPage from "./components/MonthlySalaryPage";
 import SalaryPage from "./components/SalaryPage";
+
 function App() {
   const [selectedItem, setSelectedItem] = React.useState("home");
 

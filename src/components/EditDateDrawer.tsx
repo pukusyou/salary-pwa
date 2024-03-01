@@ -59,6 +59,7 @@ const EditDateDrawer = ({
   const [addDrinkList, setAddDrinkList] = useState<EventDrinks[]>([]);
   const [bookNominationCount, setBookNomination] = useState(0);
   const [hallNominationCount, setHallNomination] = useState(0);
+
   const preDate: Date = new Date(date);
   useEffect(() => {
     const fetchEventData = async () => {
@@ -185,14 +186,17 @@ const EditDateDrawer = ({
     setAddDrinkList(newAddDrinkList);
   };
 
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOptionChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const selectedOption = e.target.value;
+    const drinkData = await drinkDB.getDrinksRecord(selectedOption);
     const isOptionExist = addDrinkList.some(
       (drink) => drink.name === selectedOption
     );
     setAddDrinkList([
       ...addDrinkList.slice(0, addDrinkList.length - 1),
-      { name: selectedOption, price: 0, value: 0 },
+      { name: selectedOption, price: drinkData.price, value: 0 },
     ]);
     if (!isOptionExist) {
       setAlert(<></>);
@@ -263,20 +267,27 @@ const EditDateDrawer = ({
                     }
                     className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
                   />
-                  <span className="mx-2">x</span>
-                  <select
-                    value={drink.value}
-                    onChange={(e) =>
-                      handleDrinkCountChange(drink.name, Number(e.target.value))
-                    }
-                    className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/5"
-                  >
-                    {Array.from({ length: 100 }, (_, i) => (
-                      <option key={i} value={i}>
-                        {i}
-                      </option>
-                    ))}
-                  </select>
+                  {drink.name !== "その他" ? (
+                    <>
+                      <span className="mx-2">x</span>
+                      <select
+                        value={drink.value}
+                        onChange={(e) =>
+                          handleDrinkCountChange(
+                            drink.name,
+                            Number(e.target.value)
+                          )
+                        }
+                        className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/5"
+                      >
+                        {Array.from({ length: 100 }, (_, i) => (
+                          <option key={i} value={i}>
+                            {i}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  ) : null}
                 </div>
               ))}
               {addDrinkList.map((drink, index) => (

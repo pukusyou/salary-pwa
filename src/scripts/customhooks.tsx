@@ -44,6 +44,9 @@ export function useDeducationAmountYen() {
     getDeductionAmountYen()
   );
   const handleDeductionAmountYenChange = (e: { target: { value: any } }) => {
+    if (isNaN(Number(e.target.value.replace(/,/g, "")))) {
+      return;
+    }
     const inputDeductionAmount = Number(e.target.value.replace(/,/g, ""));
     // マイナスの値が入力された場合は、0に設定する
     const newDeductionAmount =
@@ -61,6 +64,15 @@ export function useDeducationAmountPercent() {
   const handleDeductionAmountPercentChange = (e: {
     target: { value: any };
   }) => {
+    if (isNaN(Number(e.target.value.replace(/,/g, "")))) {
+      return;
+    }
+    if (
+      Number(e.target.value.replace(/,/g, "")) > 100 ||
+      Number(e.target.value.replace(/,/g, "")) < 0
+    ) {
+      return;
+    }
     const inputDeductionAmount = e.target.value;
     setDeductionAmount(inputDeductionAmount);
   };
@@ -69,7 +81,13 @@ export function useDeducationAmountPercent() {
 
 export function useWage(defaultWage: string) {
   const [wage, setWage] = useState(defaultWage);
-  const handleWageChange = (e: { target: { value: any } }) => {
+  const handleWageChange = (e: { target: { value: string } }) => {
+    // Numberにキャストできない場合は何もしない
+    if (isNaN(Number(e.target.value.replace(/,/g, "")))) {
+      return;
+    }
+    // 全角の数字が入力された場合は、半角に変換する
+
     const inputWage = Number(e.target.value.replace(/,/g, ""));
     // マイナスの値が入力された場合は、0に設定する
     const newWage = inputWage < 0 ? 0 : inputWage;
@@ -95,4 +113,19 @@ export function useAlert() {
     setAlert(<></>);
   };
   return { alert, handleAlertOpen, handleAlertClose };
+}
+
+export function useTimePicker(hour: number = 0, minute: number = 0) {
+  const [selectedHour, setSelectedHour] = useState<number>(hour);
+  const [selectedMinute, setSelectedMinute] = useState<number>(minute);
+
+  const handleHourChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedHour(parseInt(event.target.value));
+  };
+
+  const handleMinuteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMinute(parseInt(event.target.value));
+  };
+
+  return { selectedHour, selectedMinute, handleHourChange, handleMinuteChange };
 }

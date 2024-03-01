@@ -3,7 +3,8 @@ import drinkDB from "../scripts/drinksDB";
 import eventDB from "../scripts/eventsDB";
 import { Breakdown } from "./Breakdown";
 import InfoAlert from "./InfoAlert";
-import { useCount } from "../scripts/customhooks";
+import { useCount, useTimePicker, useWage } from "../scripts/customhooks";
+import TimePicker from "./TimePicker";
 interface Drink {
   name: string;
   price: number;
@@ -63,17 +64,16 @@ async function boolEvent(date: Date) {
   return result;
 }
 
-function toISOStringWithTimezone(date: Date): string {
-  const pad = function (str: string): string {
-    return ("0" + str).slice(-2);
-  };
-  const year = date.getFullYear().toString();
-  const month = pad((date.getMonth() + 1).toString());
-  const day = pad(date.getDate().toString());
-  const hour = pad(date.getHours().toString());
-  const min = pad(date.getMinutes().toString());
+function getDate(date: Date, hour: number, minute: number) {
+  const newDate = new Date(date);
+  if (hour >= 24) {
+    newDate.setDate(newDate.getDate() + 1);
+    hour -= 24;
+  }
+  newDate.setHours(hour);
+  newDate.setMinutes(minute);
 
-  return `${year}-${month}-${day}T${hour}:${min}`;
+  return newDate;
 }
 
 const DateDrawer = ({
@@ -87,9 +87,26 @@ const DateDrawer = ({
 }) => {
   const [alert, setAlert] = useState(<></>);
   const [isEvenst, setIsEvent] = useState(true);
-  const [startTime, setStartTime] = useState(date);
-  const [endTime, setEndTime] = useState(date);
+  // const [startTime, setStartTime] = useState(date);
+  // const [endTime, setEndTime] = useState(date);
+  const {
+    selectedHour: startSelectedHour,
+    selectedMinute: startSelectedMinute,
+    handleHourChange: startHandleHourChange,
+    handleMinuteChange: startHandleMinuteChange,
+  } = useTimePicker();
+
+  const {
+    selectedHour: endSelectedHour,
+    selectedMinute: endSelectedMinute,
+    handleHourChange: endHandleHourChange,
+    handleMinuteChange: endHandleMinuteChange,
+  } = useTimePicker();
+  let startTime = getDate(date, startSelectedHour, startSelectedMinute);
+  let endTime = getDate(date, endSelectedHour, endSelectedMinute);
   const [drinkCounts, setDrinkCounts] = useState<DrinkNames[]>([]);
+  const { wage: etcPrice, handleWageChange: handleETCPriceChange } =
+    useWage("0");
   const [eventStart, setEventStart] = useState(new Date());
   const {
     count: bookNominationCount,
@@ -101,8 +118,8 @@ const DateDrawer = ({
   } = useCount(0);
 
   useEffect(() => {
-    setStartTime(date);
-    setEndTime(date);
+    // setStartTime(date);
+    // setEndTime(date);
   }, [date]);
   useEffect(() => {
     const fetchDrinkCounts = async () => {
@@ -171,7 +188,13 @@ const DateDrawer = ({
         });
       }
     }
-    console.log(typeof bookNominationCount);
+    if (Number(etcPrice.replace(/,/g, "")) > 0) {
+      drinkData.push({
+        name: "その他",
+        price: Number(etcPrice.replace(/,/g, "")),
+        value: 1,
+      });
+    }
     eventDB.addEventsRecord(
       startTime,
       endTime,
@@ -192,7 +215,7 @@ const DateDrawer = ({
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
-
+        {alert}
         <div className="relative bg-white rounded-lg p-8 max-w-md w-full">
           {isEvenst ? (
             <>
@@ -204,38 +227,17 @@ const DateDrawer = ({
             </>
           ) : (
             <>
-              <div className="mb-4">
-                {alert}
-                <label
-                  htmlFor="startTime"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  開始日時:
-                </label>
-                <input
-                  type="datetime-local"
-                  id="startTime"
-                  value={toISOStringWithTimezone(startTime)}
-                  onChange={(e) => setStartTime(new Date(e.target.value))}
-                  className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="endTime"
-                  className="block text-gray-700 font-bold mb-2"
-                >
-                  終了日時:
-                </label>
-                <input
-                  type="datetime-local"
-                  id="endTime"
-                  min={toISOStringWithTimezone(startTime)}
-                  value={toISOStringWithTimezone(endTime)}
-                  onChange={(e) => setEndTime(new Date(e.target.value))}
-                  className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
+              <TimePicker
+                date={date}
+                startSelectedHour={startSelectedHour}
+                startSelectedMinute={startSelectedMinute}
+                startHandleHourChange={startHandleHourChange}
+                startHandleMinuteChange={startHandleMinuteChange}
+                endSelectedHour={endSelectedHour}
+                endSelectedMinute={endSelectedMinute}
+                endHandleHourChange={endHandleHourChange}
+                endHandleMinuteChange={endHandleMinuteChange}
+              />
               <div className="mb-4">
                 <label
                   htmlFor="drinkCount"
@@ -268,6 +270,21 @@ const DateDrawer = ({
                     </select>
                   </div>
                 ))}
+                <div className="flex items-center justify-between mb-2">
+                  <h1 className="flex-grow">シャンパン等</h1>
+                  <span className="mx-2">￥</span>
+                  <input
+                    inputMode="numeric"
+                    pattern="\d*"
+                    type="text"
+                    id="hourlyRate"
+                    className="mt-1 block w-1/3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
+                    placeholder="金額を入力"
+                    value={etcPrice}
+                    min="0" // マイナスの値を入力できないようにする
+                    onChange={handleETCPriceChange}
+                  />
+                </div>
               </div>
               <div className="mb-4">
                 <label
