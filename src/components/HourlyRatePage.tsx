@@ -3,6 +3,7 @@ import {
   useAlert,
   useDeducationAmountPercent,
   useDeducationAmountYen,
+  useToggle,
   useToggleButton,
   useWage,
 } from "../scripts/customhooks";
@@ -10,10 +11,15 @@ import {
 const hourlyRateKey: string = "hourlyRate";
 const deductionAmountPercentKey: string = "deductionAmountPercent";
 const bookNominationKey: string = "bookNomination";
+const bookNominationBackKey: string = "bookNominationBack";
 const hallNominationKey: string = "hallNomination";
+const salesBackKey: string = "salesBack";
 
 const HourlyRatePage = () => {
   const { alert, handleAlertOpen } = useAlert();
+  const { toggle, handleToggle } = useToggle(
+    localStorage.getItem(bookNominationBackKey) === "true"
+  );
   // const [hourlyRate, setHourlyRate] = useState(getHourlyRate());
   const { wage: hourlyRate, handleWageChange: handleHourlyRateChange } =
     useWage(
@@ -23,6 +29,10 @@ const HourlyRatePage = () => {
     useDeducationAmountYen();
   const { deductionAmountPercent, handleDeductionAmountPercentChange } =
     useDeducationAmountPercent();
+  const {
+    deductionAmountPercent: salesBack,
+    handleDeductionAmountPercentChange: handleSalesBackChange,
+  } = useDeducationAmountPercent();
   // const [deductionUnit, setDeductionUnit] = useState(getDeductionUnit());
   const { selectedOption, handleOptionClick } = useToggleButton();
   const { wage: bookNomination, handleWageChange: handleBookNominationChange } =
@@ -54,6 +64,8 @@ const HourlyRatePage = () => {
     localStorage.setItem(hourlyRateKey, hourlyRate.replace(/,/g, ""));
     localStorage.setItem(bookNominationKey, String(bookNomination));
     localStorage.setItem(hallNominationKey, String(hallNomination));
+    localStorage.setItem(bookNominationBackKey, String(toggle));
+    localStorage.setItem(salesBackKey, String(salesBack));
   };
 
   return (
@@ -80,6 +92,42 @@ const HourlyRatePage = () => {
             onChange={handleHourlyRateChange}
           />
         </div>
+        <div className="mb-4">
+          <label className="inline-flex items-center cursor-pointer">
+            <span className="mr-3">本指名売上バック</span>
+            <input
+              type="checkbox"
+              checked={toggle}
+              onChange={handleToggle}
+              className="sr-only peer"
+            />
+            <div
+              className={`relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 ${
+                toggle
+                  ? "peer-checked:after:translate-x-full"
+                  : "rtl:peer-checked:after:-translate-x-full"
+              } peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 ${
+                toggle ? "peer-checked:bg-blue-600" : ""
+              }`}
+            ></div>
+          </label>
+          {toggle ? (
+            <div className="flex items-center">
+              <input
+                inputMode="numeric"
+                pattern="\d*"
+                type="text"
+                id="deductionAmountPercent"
+                className="mt-1 block w-3/4 border-gray-300 rounded-l-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
+                placeholder="数値"
+                value={salesBack}
+                onChange={handleSalesBackChange}
+              />
+              %
+            </div>
+          ) : null}
+        </div>
+
         <div className="mb-6">
           <label
             htmlFor="bookNomination"

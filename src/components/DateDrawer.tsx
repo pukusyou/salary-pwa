@@ -5,6 +5,9 @@ import { Breakdown } from "./Breakdown";
 import InfoAlert from "./InfoAlert";
 import { useCount, useTimePicker, useWage } from "../scripts/customhooks";
 import TimePicker from "./TimePicker";
+import BookNominationBack from "./BookNominationBack";
+
+const bookNominationBackKey: string = "bookNominationBack";
 interface Drink {
   name: string;
   price: number;
@@ -108,19 +111,14 @@ const DateDrawer = ({
   const { wage: etcPrice, handleWageChange: handleETCPriceChange } =
     useWage("0");
   const [eventStart, setEventStart] = useState(new Date());
-  const {
-    count: bookNominationCount,
-    handleCountChange: handleBookNominationCountChange,
-  } = useCount(0);
+  const [bookNominationCount, setBookNomination] = useState(0);
   const {
     count: hallNominationCount,
     handleCountChange: handleHallNominationCountChange,
   } = useCount(0);
-
-  useEffect(() => {
-    // setStartTime(date);
-    // setEndTime(date);
-  }, [date]);
+  const [values, setValues] = useState<string[]>(
+    Array(bookNominationCount).fill("0")
+  );
   useEffect(() => {
     const fetchDrinkCounts = async () => {
       const drinks = await getDrinksName();
@@ -142,6 +140,17 @@ const DateDrawer = ({
     };
     fetchIsEvent();
   }, [date]);
+
+  const handleBookNominationCountChange = (value: number) => {
+    let prev = bookNominationCount;
+    setBookNomination(value);
+    if (prev < value) {
+      setValues(values.concat(Array(value - prev).fill("0")));
+    } else {
+      setValues(values.slice(0, value));
+    }
+  };
+
   // ドリンク数と価格の変更を処理する関数
   const handleDrinkCountChange = (name: string, value: number) => {
     const updatedCounts = drinkCounts.map((count) => {
@@ -157,7 +166,6 @@ const DateDrawer = ({
     setDrinkCounts([]);
     setOpen(false);
   };
-
   const handleSubmit = async () => {
     var drinkData: EventDrinks[] = [];
     if (startTime >= endTime) {
@@ -195,12 +203,14 @@ const DateDrawer = ({
         value: 1,
       });
     }
+    var numValues = values.map((value) => Number(value.replace(/,/g, "")));
     eventDB.addEventsRecord(
       startTime,
       endTime,
       drinkData,
       bookNominationCount,
-      hallNominationCount
+      hallNominationCount,
+      numValues
     );
     handleClose();
   };
@@ -310,6 +320,10 @@ const DateDrawer = ({
                     ))}
                   </select>
                 </div>
+
+                {localStorage.getItem(bookNominationBackKey) === "true" ? (
+                  <BookNominationBack values={values} onUpdate={setValues} />
+                ) : null}
                 <div className="flex items-center justify-between mb-2">
                   <h1 className="flex-grow">場内指名</h1>
                   <span className="mx-2">x</span>

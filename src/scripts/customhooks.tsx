@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InfoAlert from "../components/InfoAlert";
 
 const deductionAmountYenKey: string = "deductionAmountYen";
@@ -128,4 +128,20 @@ export function useTimePicker(hour: number = 0, minute: number = 0) {
   };
 
   return { selectedHour, selectedMinute, handleHourChange, handleMinuteChange };
+}
+
+export function useToggle(defaultToggle: boolean = false) {
+  const [toggle, setToggle] = useState(defaultToggle);
+  const handleToggle = () => {
+    setToggle(!toggle);
+  };
+  return { toggle, handleToggle };
+}
+
+export function usePrevious(value: number) {
+  const ref = useRef<number>(value);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }

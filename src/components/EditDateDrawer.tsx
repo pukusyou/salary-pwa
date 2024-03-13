@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import eventDB from "../scripts/eventsDB";
 import drinkDB from "../scripts/drinksDB";
 import InfoAlert from "./InfoAlert";
+import BookNominationBack from "./BookNominationBack";
+
+const bookNominationBackKey: string = "bookNominationBack";
 
 interface EventDrinks {
   name: string;
@@ -59,7 +62,9 @@ const EditDateDrawer = ({
   const [addDrinkList, setAddDrinkList] = useState<EventDrinks[]>([]);
   const [bookNominationCount, setBookNomination] = useState(0);
   const [hallNominationCount, setHallNomination] = useState(0);
-
+  const [values, setValues] = useState<string[]>(
+    Array(bookNominationCount).fill("0")
+  );
   const preDate: Date = new Date(date);
   useEffect(() => {
     const fetchEventData = async () => {
@@ -68,6 +73,7 @@ const EditDateDrawer = ({
       setEndTime(eventData.end);
       setBookNomination(eventData.bookNomination);
       setHallNomination(eventData.hallNomination);
+      setValues(eventData.sales.map((value: number) => value.toLocaleString()));
       const drinkData: EventDrinks[] = [];
       for (var key in eventData.drinks) {
         var drinkName = eventData.drinks[key].name;
@@ -87,6 +93,16 @@ const EditDateDrawer = ({
 
     fetchEventData();
   }, [date]);
+
+  const handleBookNominationCountChange = (value: number) => {
+    let prev = bookNominationCount;
+    setBookNomination(value);
+    if (prev < value) {
+      setValues(values.concat(Array(value - prev).fill("0")));
+    } else {
+      setValues(values.slice(0, value));
+    }
+  };
 
   const handleDrinkCountChange = (name: string, value: number) => {
     const updatedCounts = drinkCounts.map((count) => {
@@ -138,13 +154,15 @@ const EditDateDrawer = ({
         drinkData.push(addDrinkList[key]);
       }
     }
+    var newValues = values.map((value) => Number(value.replace(/,/g, "")));
     if (startTime === preDate) {
       eventDB.putEventsRecord(
         startTime,
         endTime,
         drinkData,
         bookNominationCount,
-        hallNominationCount
+        hallNominationCount,
+        newValues
       );
     } else {
       eventDB.deleteEventsRecord(preDate);
@@ -153,7 +171,8 @@ const EditDateDrawer = ({
         endTime,
         drinkData,
         bookNominationCount,
-        hallNominationCount
+        hallNominationCount,
+        newValues
       );
     }
     setNewStartDate(startTime);
@@ -393,7 +412,9 @@ const EditDateDrawer = ({
                 <select
                   value={bookNominationCount}
                   className="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-1/3"
-                  onChange={(e) => setBookNomination(Number(e.target.value))}
+                  onChange={(e) =>
+                    handleBookNominationCountChange(Number(e.target.value))
+                  }
                 >
                   {Array.from({ length: 100 }, (_, i) => (
                     <option key={i} value={i}>
@@ -402,6 +423,9 @@ const EditDateDrawer = ({
                   ))}
                 </select>
               </div>
+              {localStorage.getItem(bookNominationBackKey) === "true" ? (
+                <BookNominationBack values={values} onUpdate={setValues} />
+              ) : null}
               <div className="flex items-center justify-between mb-2">
                 <h1 className="flex-grow">場内指名</h1>
                 <span className="mx-2">x</span>
