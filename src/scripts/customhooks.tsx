@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import InfoAlert from "../components/InfoAlert";
 
 const deductionAmountYenKey: string = "deductionAmountYen";
-const deductionAmountPercentKey: string = "deductionAmountPercent";
+// const deductionAmountPercentKey: string = "deductionAmountPercent";
 const deductionAmountOptionKey: string = "deductionAmountOption";
+const salesBackKey: string = "salesBack";
 
 function getDeductionAmountYen() {
   var deductionAmount = localStorage.getItem(deductionAmountYenKey);
@@ -14,13 +15,19 @@ function getDeductionAmountYen() {
   }
 }
 
-function getDeductionAmountPercent() {
-  var deductionAmount = localStorage.getItem(deductionAmountPercentKey);
-  if (deductionAmount) {
-    return Number(deductionAmount).toLocaleString("ja-JP");
-  } else {
-    return 0;
-  }
+/**
+ * 本指名売上バック
+ * @param sales 会計のリスト
+ * @returns 本指名売上バックの合計
+ */
+export function getBookNominationBack(sales: number[]){
+  const salesBack = localStorage.getItem(salesBackKey) || "0";
+  const salesSum = sales.reduce((a, b) => a + b, 0);
+  return Math.floor(salesSum * parseFloat(salesBack)/100);
+}
+
+export function floorNum(num: number, digit: number) {
+  return (Math.floor(num * Math.pow(10, digit)) / Math.pow(10, digit)).toFixed(1);
 }
 
 export function useToggleButton() {
@@ -57,9 +64,12 @@ export function useDeducationAmountYen() {
   return { deductionAmountYen, handleDeductionAmountYenChange };
 }
 
-export function useDeducationAmountPercent() {
+export function useDeducationAmountPercent(defaultValue: string | null) {
+  if (defaultValue === null) {
+    defaultValue = "0"
+  }
   const [deductionAmountPercent, setDeductionAmount] = useState(
-    getDeductionAmountPercent()
+    defaultValue
   );
   const handleDeductionAmountPercentChange = (e: {
     target: { value: any };

@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
 import eventDB from "../scripts/eventsDB";
 import EditDateDrawer from "./EditDateDrawer";
+import { getBookNominationBack } from "../scripts/customhooks";
 
 const hourlyRateKey: string = "hourlyRate";
 const deductionAmountYenKey: string = "deductionAmountYen";
 const deductionAmountPercentKey: string = "deductionAmountPercent";
 const deductionAmountOptionKey: string = "deductionAmountOption";
+const salesBackKey: string = "salesBack";
+const salesBackOptionKey: string = "bookNominationBack";
+
 interface EventList {
   start: Date;
   end: Date;
   drinks: DrinkNames[];
   bookNomination: number;
   hallNomination: number;
+  sales: number[];
 }
 
 interface DrinkNames {
@@ -19,15 +24,17 @@ interface DrinkNames {
   price: number;
   value: number;
 }
+
 function calcSalary(eventData: EventList) {
   var total = 0;
-  var deductionAmountYen = localStorage.getItem(deductionAmountYenKey);
-  var deductionAmountPercent = localStorage.getItem(deductionAmountPercentKey);
+  var deductionAmountYen = localStorage.getItem(deductionAmountYenKey) || "0";
+  var deductionAmountPercent = localStorage.getItem(deductionAmountPercentKey) || "0";
   var deductionAmountOption = localStorage.getItem(deductionAmountOptionKey);
   total += calcPlusSalary(eventData);
   //   引かれもの
+  console.log(total * parseFloat(deductionAmountPercent))
   if (deductionAmountOption === "0") {
-    total -= Math.floor((total * Number(deductionAmountPercent)) / 100);
+    total -= Math.floor((total * Number.parseFloat(deductionAmountPercent)) / 100);
   } else if (deductionAmountOption === "1") {
     total -= Number(deductionAmountYen);
   } else {
@@ -51,8 +58,22 @@ function calcPlusSalary(eventData: EventList) {
   total +=
     Number(localStorage.getItem("bookNomination")) * eventData.bookNomination +
     Number(localStorage.getItem("hallNomination")) * eventData.hallNomination;
+    console.log(localStorage.getItem("bookNomination"))
+  //   本指名売上バック
+  total += getBookNominationBack(eventData.sales);
   return total;
 }
+
+// /**
+//  * 本指名売上バック
+//  * @param sales 会計のリスト
+//  * @returns 本指名売上バックの合計
+//  */
+// function getBookNominationBack(sales: number[]){
+//   const salesBack = localStorage.getItem(salesBackKey) || "0";
+//   const salesSum = sales.reduce((a, b) => a + b, 0);
+//   return Math.floor(salesSum * parseFloat(salesBack)/100);
+// }
 
 function getDeduction(eventData: EventList) {
   var result: String = "";
@@ -139,20 +160,26 @@ export const Breakdown = ({
                       ).toLocaleString("ja-JP")}
                     </span>
                   </li>
-                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                  {eventData.bookNomination > 0 ?<li className="flex justify-between items-center py-2 border-b border-gray-300">
                     <span>本指名</span>
                     <span className="text-right">
                       {eventData.bookNomination} x ￥{" "}
-                      {localStorage.getItem("bookNomination")}
+                      {Number(localStorage.getItem("bookNomination")).toLocaleString("ja-JP")}
                     </span>
-                  </li>
-                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                  </li>: null}
+                  {localStorage.getItem(salesBackOptionKey) ==="true" && eventData.bookNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                    <span>本指名売上バック</span>
+                    <span className="text-right">
+                      {localStorage.getItem(salesBackKey)} % ￥{" "} {getBookNominationBack(eventData.sales).toLocaleString("ja-JP")}
+                    </span>
+                  </li>: null}
+                  {eventData.hallNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
                     <span>場内指名</span>
                     <span className="text-right">
                       {eventData.hallNomination} x ￥{" "}
-                      {localStorage.getItem("hallNomination")}
+                      {Number(localStorage.getItem("hallNomination")).toLocaleString("ja-JP")}
                     </span>
-                  </li>
+                  </li>: null}
                   {eventData.drinks.map((drink, index) => (
                     <li
                       key={index}

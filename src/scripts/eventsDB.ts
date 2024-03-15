@@ -28,6 +28,14 @@ class EventsDB {
     return EventsDB.instance;
   }
 
+  makeDB(): void {
+    if (!(events in this.db)) {
+      this.db.version(1).stores({
+        Events: "&start, end, drinks, bookNomination, hallNomination, sales",
+      });
+    }
+  }
+
   async addEventsRecord(
     start: Date,
     end: Date,
@@ -74,6 +82,10 @@ class EventsDB {
 
   async getAllEventsRecord(): Promise<any> {
     return await this.db.table(events).toArray();
+  }
+
+  deleteDB(): void {
+    this.db.delete();
   }
 }
 

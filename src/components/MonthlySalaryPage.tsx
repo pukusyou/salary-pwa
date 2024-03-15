@@ -3,6 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import eventDB from "../scripts/eventsDB";
 import { MonthlyBreakDown } from "./MonthlyBreakDown";
+import { floorNum, getBookNominationBack } from "../scripts/customhooks";
 
 interface EventData {
   start: Date;
@@ -18,6 +19,7 @@ interface EventData {
 const deductionAmountYenKey: string = "deductionAmountYen";
 const deductionAmountPercentKey: string = "deductionAmountPercent";
 const deductionAmountOptionKey: string = "deductionAmountOption";
+const salesBackOptionKey: string = "bookNominationBack";
 
 function loadEventIndexedDB(date: Date) {
   var monthlyEventData: EventData[] = [];
@@ -77,6 +79,7 @@ const MonthlySalaryPage = () => {
     totalNomination: 0,
     totalBookNomination: 0,
     totalHallNomination: 0,
+    totalSalesBack: 0,
   });
   const [eventData, setEventData] = useState<EventData[]>([]);
   useEffect(() => {
@@ -92,12 +95,13 @@ const MonthlySalaryPage = () => {
       var totalHourlyWage = 0;
       var totalNomination = 0;
       var totalBookNomination = 0;
+      var totalSalesBack = 0;
       var totalHallNomination = 0;
       for (var key in result) {
         var dailySalary = 0;
         var dailyNomination = 0;
         var dailyDrinkSales = 0;
-        console.log(result[key]);
+        var dailySales: number[] = [];
         var elapsed =
           new Date(result[key].end).getTime() -
           new Date(result[key].start).getTime();
@@ -107,6 +111,7 @@ const MonthlySalaryPage = () => {
           dailyDrinkSales +=
             result[key].drinks[key2].price * result[key].drinks[key2].value;
         }
+        dailySales = result[key].sales;
         dailyNomination += result[key].bookNomination * bookNomination;
         dailyNomination += result[key].hallNomination * hallNomination;
         totalBookNomination += result[key].bookNomination;
@@ -115,10 +120,13 @@ const MonthlySalaryPage = () => {
         dailySalary += dailyNomination;
         dailySalary += elapsedHours * hourlyWage;
         dailySalary += dailyDrinkSales;
+        let dailySalesBack = localStorage.getItem(salesBackOptionKey) === "true" ? getBookNominationBack(dailySales) : 0;
+        dailySalary += dailySalesBack;
         var deduction = getDeduction(dailySalary);
         totalDeduction += deduction;
         totalSalary += dailySalary;
         totalSalary -= deduction;
+        totalSalesBack += dailySalesBack;
         totalNomination += dailyNomination;
         drinkSales += dailyDrinkSales;
         totalHourlyWage += elapsedHours * hourlyWage;
@@ -134,6 +142,7 @@ const MonthlySalaryPage = () => {
         totalNomination: totalNomination,
         totalBookNomination: totalBookNomination,
         totalHallNomination: totalHallNomination,
+        totalSalesBack: totalSalesBack,
       });
     });
   }, [selectedDate]);
@@ -180,6 +189,7 @@ const MonthlySalaryPage = () => {
         deducation={monthlyData.totalDeduction}
         bookNomination={monthlyData.totalBookNomination}
         hallNomination={monthlyData.totalHallNomination}
+        totalSales={monthlyData.totalSalesBack}
       />
       <div className="flex items-center mr-4">
         <button
@@ -237,7 +247,7 @@ const MonthlySalaryPage = () => {
         <div className="flex justify-between">
           <div className="text-center">
             <p className="text-sm text-gray-600">勤務時間</p>
-            <p className="font-semibold">{monthlyData.workingHours} 時間</p>
+            <p className="font-semibold">{floorNum(monthlyData.workingHours, 2)} 時間</p>
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">給与</p>

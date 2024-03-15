@@ -11,14 +11,14 @@ import {
 const hourlyRateKey: string = "hourlyRate";
 const deductionAmountPercentKey: string = "deductionAmountPercent";
 const bookNominationKey: string = "bookNomination";
-const bookNominationBackKey: string = "bookNominationBack";
+const bookNominationBackToggleKey: string = "bookNominationBack";
 const hallNominationKey: string = "hallNomination";
 const salesBackKey: string = "salesBack";
 
 const HourlyRatePage = () => {
   const { alert, handleAlertOpen } = useAlert();
   const { toggle, handleToggle } = useToggle(
-    localStorage.getItem(bookNominationBackKey) === "true"
+    localStorage.getItem(bookNominationBackToggleKey) === "true"
   );
   // const [hourlyRate, setHourlyRate] = useState(getHourlyRate());
   const { wage: hourlyRate, handleWageChange: handleHourlyRateChange } =
@@ -28,11 +28,11 @@ const HourlyRatePage = () => {
   const { deductionAmountYen, handleDeductionAmountYenChange } =
     useDeducationAmountYen();
   const { deductionAmountPercent, handleDeductionAmountPercentChange } =
-    useDeducationAmountPercent();
+    useDeducationAmountPercent(localStorage.getItem(deductionAmountPercentKey));
   const {
     deductionAmountPercent: salesBack,
     handleDeductionAmountPercentChange: handleSalesBackChange,
-  } = useDeducationAmountPercent();
+  } = useDeducationAmountPercent(localStorage.getItem(salesBackKey));
   // const [deductionUnit, setDeductionUnit] = useState(getDeductionUnit());
   const { selectedOption, handleOptionClick } = useToggleButton();
   const { wage: bookNomination, handleWageChange: handleBookNominationChange } =
@@ -62,9 +62,9 @@ const HourlyRatePage = () => {
       String(deductionAmountPercent)
     );
     localStorage.setItem(hourlyRateKey, hourlyRate.replace(/,/g, ""));
-    localStorage.setItem(bookNominationKey, String(bookNomination));
-    localStorage.setItem(hallNominationKey, String(hallNomination));
-    localStorage.setItem(bookNominationBackKey, String(toggle));
+    localStorage.setItem(bookNominationKey, bookNomination.replace(/,/g, ""));
+    localStorage.setItem(hallNominationKey, hallNomination.replace(/,/g, ""));
+    localStorage.setItem(bookNominationBackToggleKey, String(toggle));
     localStorage.setItem(salesBackKey, String(salesBack));
   };
 

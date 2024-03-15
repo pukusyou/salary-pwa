@@ -1,4 +1,7 @@
 const hourlyRateKey: string = "hourlyRate";
+const salesBackOptionKey: string = "bookNominationBack";
+const salesBackKey: string = "salesBack";
+
 interface EventList {
   start: Date;
   end: Date;
@@ -43,6 +46,7 @@ export const MonthlyBreakDown = ({
   deducation,
   bookNomination,
   hallNomination,
+  totalSales,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -52,6 +56,7 @@ export const MonthlyBreakDown = ({
   deducation: number;
   bookNomination: number;
   hallNomination: number;
+  totalSales: number;
 }) => {
   const toggleDrawer = (open: boolean) => () => {
     setOpen(open);
@@ -87,20 +92,26 @@ export const MonthlyBreakDown = ({
                       ).toLocaleString("ja-JP")}
                     </span>
                   </li>
-                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                  {bookNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
                     <span>本指名</span>
                     <span className="text-right">
                       {bookNomination} x ￥
                       {localStorage.getItem("bookNomination")}
                     </span>
-                  </li>
-                  <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                  </li>: null}
+                  {localStorage.getItem(salesBackOptionKey) === "true" && bookNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                    <span>本指名会計バック</span>
+                    <span className="text-right">
+                    {localStorage.getItem(salesBackKey)} % ￥{" "} {totalSales.toLocaleString("ja-JP")}
+                    </span>
+                  </li>: null}
+                  {hallNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
                     <span>場内指名</span>
                     <span className="text-right">
                       {hallNomination} x ￥
                       {localStorage.getItem("hallNomination")}
                     </span>
-                  </li>
+                  </li>: null}
                   {getDrinkList(eventData).map((drink, index) => (
                     <li
                       key={index}
