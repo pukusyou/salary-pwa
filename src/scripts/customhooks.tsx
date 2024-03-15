@@ -20,14 +20,16 @@ function getDeductionAmountYen() {
  * @param sales 会計のリスト
  * @returns 本指名売上バックの合計
  */
-export function getBookNominationBack(sales: number[]){
+export function getBookNominationBack(sales: number[]) {
   const salesBack = localStorage.getItem(salesBackKey) || "0";
   const salesSum = sales.reduce((a, b) => a + b, 0);
-  return Math.floor(salesSum * parseFloat(salesBack)/100);
+  return Math.floor((salesSum * parseFloat(salesBack)) / 100);
 }
 
 export function floorNum(num: number, digit: number) {
-  return (Math.floor(num * Math.pow(10, digit)) / Math.pow(10, digit)).toFixed(1);
+  return (Math.floor(num * Math.pow(10, digit)) / Math.pow(10, digit)).toFixed(
+    1
+  );
 }
 
 export function useToggleButton() {
@@ -66,25 +68,30 @@ export function useDeducationAmountYen() {
 
 export function useDeducationAmountPercent(defaultValue: string | null) {
   if (defaultValue === null) {
-    defaultValue = "0"
+    defaultValue = "0";
   }
-  const [deductionAmountPercent, setDeductionAmount] = useState(
-    defaultValue
-  );
+  const [deductionAmountPercent, setDeductionAmount] = useState(defaultValue);
   const handleDeductionAmountPercentChange = (e: {
     target: { value: any };
   }) => {
-    if (isNaN(Number(e.target.value.replace(/,/g, "")))) {
-      return;
-    }
+    console.log(e.target.value.replace(/,/g, "").slice(-1));
     if (
-      Number(e.target.value.replace(/,/g, "")) > 100 ||
-      Number(e.target.value.replace(/,/g, "")) < 0
+      isNaN(Number(e.target.value.replace(/,/g, ""))) &&
+      e.target.value.replace(/,/g, "").slice(-1) !== "."
     ) {
       return;
     }
-    const inputDeductionAmount = e.target.value;
-    setDeductionAmount(inputDeductionAmount);
+    if (e.target.value.replace(/,/g, "").slice(-1) !== ".") {
+      let inputValue = Number(e.target.value.replace(/,/g, ""));
+      if (inputValue > 100) {
+        inputValue = 100;
+      } else if (inputValue < 0) {
+        inputValue = 0;
+      }
+      setDeductionAmount(inputValue.toLocaleString("ja-JP"));
+    } else {
+      setDeductionAmount(e.target.value);
+    }
   };
   return { deductionAmountPercent, handleDeductionAmountPercentChange };
 }

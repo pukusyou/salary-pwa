@@ -32,7 +32,7 @@ const BookNominationBack: React.FC<Props> = ({ values, onUpdate }) => {
           本指名会計:
         </label>
       ) : null}
-      {Array.from({ length: values.length }).map((_, index) => (
+      {Array.from({ length: Math.min(values.length, 5) }).map((_, index) => (
         <div key={index} className="flex h-12 my-2 p-2 items-center">
           <span className="mr-2">￥</span>
           <input
