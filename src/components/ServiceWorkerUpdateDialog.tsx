@@ -13,7 +13,7 @@ const ServiceWorkerUpdateDialog = (props: {
   };
 
   return (
-    <div className={`fixed inset-0 ${show ? "block" : "hidden"}`}>
+    <div className={`fixed inset-0 ${show ? "block" : "hidden"} z-50`}>
       <div className="flex items-center justify-center min-h-screen">
         <div className="bg-white p-8 rounded-lg shadow-lg">
           <h2 className="text-center text-lg font-semibold mb-4">
