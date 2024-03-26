@@ -9,12 +9,49 @@ import HourlyRatePage from "./components/HourlyRatePage";
 import CutoffDatePage from "./components/CutoffDatePage";
 // import MonthlySalaryPage from "./components/MonthlySalaryPage";
 import SalaryPage from "./components/SalaryPage";
+import Joyride from "react-joyride";
+
+const steps = [
+  {
+    target: "#setting",
+    content: <h2>初めに設定を行いましょう</h2>,
+    locale: { skip: "スキップ", next: "次へ", back: "戻る", last: "完了" },
+    disableBeacon: true,
+    spotlightClicks: true,
+  },
+  {
+    target: "#settingList",
+    content: <h2>ここで各種設定を行うことができます</h2>,
+    locale: { skip: "スキップ", next: "次へ", back: "戻る", last: "完了" },
+    disableBeacon: true,
+    spotlightClicks: true,
+  },
+];
 
 function App() {
   const [selectedItem, setSelectedItem] = React.useState("home");
-
+  let run = false;
+  if (localStorage.getItem("hourlyRate") === null) {
+    run = true;
+  }
+  console.log(run);
   return (
     <div className="App all">
+      <Joyride
+        continuous
+        hideCloseButton
+        run={run} // ツアーを始める時にtrueにする
+        scrollToFirstStep
+        showProgress // 1/2などの数が表示される
+        showSkipButton
+        steps={steps}
+        spotlightClicks
+        styles={{
+          options: {
+            zIndex: 10000,
+          },
+        }}
+      />
       <Router>
         <main className="bg-gray-100">
           <Routes>

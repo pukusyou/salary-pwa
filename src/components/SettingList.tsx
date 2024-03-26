@@ -11,7 +11,10 @@ const SettingsList = () => {
   return (
     <div className="p-4">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg overflow-hidden shadow-md">
+        <div
+          className="bg-white rounded-lg overflow-hidden shadow-md"
+          id="settingList"
+        >
           <div className="divide-y divide-gray-200">
             {/* 通知設定 */}
             <Link to="hourly" className="block">
@@ -40,10 +43,18 @@ const SettingsList = () => {
                 </p>
               </div>
             </Link>
-            <div className="p-4" style={{ cursor: 'pointer' }} onClick={resetDB}>
-              <h2 className="text-lg font-semibold mb-2"><span style={{ color: 'red' }}>リセット</span></h2>
+            <div
+              className="p-4"
+              style={{ cursor: "pointer" }}
+              onClick={resetDB}
+            >
+              <h2 className="text-lg font-semibold mb-2">
+                <span style={{ color: "red" }}>リセット</span>
+              </h2>
               <p className="text-sm text-gray-500">
-                <span style={{ color: 'red' }}>登録情報のリセットを行います</span>
+                <span style={{ color: "red" }}>
+                  登録情報のリセットを行います
+                </span>
               </p>
             </div>
             {/* 他の設定項目を追加 */}

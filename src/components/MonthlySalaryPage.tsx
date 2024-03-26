@@ -3,7 +3,11 @@ import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 import eventDB from "../scripts/eventsDB";
 import { MonthlyBreakDown } from "./MonthlyBreakDown";
-import { floorNum, getBookNominationBack } from "../scripts/customhooks";
+import {
+  floorNum,
+  floorWage,
+  getBookNominationBack,
+} from "../scripts/customhooks";
 
 interface EventData {
   start: Date;
@@ -120,7 +124,10 @@ const MonthlySalaryPage = () => {
         dailySalary += dailyNomination;
         dailySalary += elapsedHours * hourlyWage;
         dailySalary += dailyDrinkSales;
-        let dailySalesBack = localStorage.getItem(salesBackOptionKey) === "true" ? getBookNominationBack(dailySales) : 0;
+        let dailySalesBack =
+          localStorage.getItem(salesBackOptionKey) === "true"
+            ? getBookNominationBack(dailySales)
+            : 0;
         dailySalary += dailySalesBack;
         var deduction = getDeduction(dailySalary);
         totalDeduction += deduction;
@@ -239,7 +246,7 @@ const MonthlySalaryPage = () => {
       <div className="w-full lg:w-3/4 xl:w-1/2 max-w-min mt-1">
         <Doughnut data={chartData} height={500} width={500} />
         <p className="text-center mt-8 text-2xl font-bold">
-          合計給与: ￥{monthlyData.totalSalary.toLocaleString()}
+          合計給与: ￥{floorWage(monthlyData.totalSalary).toLocaleString()}
         </p>
       </div>
       {/* 画面下部 */}
@@ -247,24 +254,26 @@ const MonthlySalaryPage = () => {
         <div className="flex justify-between">
           <div className="text-center">
             <p className="text-sm text-gray-600">勤務時間</p>
-            <p className="font-semibold">{floorNum(monthlyData.workingHours, 2)} 時間</p>
+            <p className="font-semibold">
+              {floorNum(monthlyData.workingHours, 2)} 時間
+            </p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">給与</p>
+            <p className="text-sm text-gray-600">時給</p>
             <p className="font-semibold">
-              ￥{monthlyData.totalHourlyWage.toLocaleString()}
+              ￥{floorWage(monthlyData.totalHourlyWage).toLocaleString()}
             </p>
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">ドリンク料</p>
             <p className="font-semibold">
-              ￥{monthlyData.drinkSales.toLocaleString()}
+              ￥{floorWage(monthlyData.drinkSales).toLocaleString()}
             </p>
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">指名料</p>
             <p className="font-semibold">
-              ￥{monthlyData.totalNomination.toLocaleString()}
+              ￥{floorWage(monthlyData.totalNomination).toLocaleString()}
             </p>
           </div>
           {/* <div className="text-center">

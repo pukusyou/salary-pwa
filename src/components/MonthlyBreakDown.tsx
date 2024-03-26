@@ -1,3 +1,5 @@
+import { floorWage } from "../scripts/customhooks";
+
 const hourlyRateKey: string = "hourlyRate";
 const salesBackOptionKey: string = "bookNominationBack";
 const salesBackKey: string = "salesBack";
@@ -76,7 +78,7 @@ export const MonthlyBreakDown = ({
           <div className="flex justify-center items-center">
             <div className="flex justify-center items-center flex-col bg-white rounded-lg shadow-lg p-8 w-full">
               <div className="text-2xl font-bold mb-4">
-                ￥ {salary.toLocaleString("ja-JP")}
+                ￥ {floorWage(salary).toLocaleString("ja-JP")}
               </div>
               <div className="border-b border-gray-300 w-full"></div>
               <div className="mt-4 w-full">
@@ -92,26 +94,34 @@ export const MonthlyBreakDown = ({
                       ).toLocaleString("ja-JP")}
                     </span>
                   </li>
-                  {bookNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
-                    <span>本指名</span>
-                    <span className="text-right">
-                      {bookNomination} x ￥
-                      {localStorage.getItem("bookNomination")}
-                    </span>
-                  </li>: null}
-                  {localStorage.getItem(salesBackOptionKey) === "true" && bookNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
-                    <span>本指名会計バック</span>
-                    <span className="text-right">
-                    {localStorage.getItem(salesBackKey)} % ￥{" "} {totalSales.toLocaleString("ja-JP")}
-                    </span>
-                  </li>: null}
-                  {hallNomination > 0 ? <li className="flex justify-between items-center py-2 border-b border-gray-300">
-                    <span>場内指名</span>
-                    <span className="text-right">
-                      {hallNomination} x ￥
-                      {localStorage.getItem("hallNomination")}
-                    </span>
-                  </li>: null}
+                  {bookNomination > 0 ? (
+                    <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                      <span>本指名</span>
+                      <span className="text-right">
+                        {bookNomination} x ￥
+                        {localStorage.getItem("bookNomination")}
+                      </span>
+                    </li>
+                  ) : null}
+                  {localStorage.getItem(salesBackOptionKey) === "true" &&
+                  bookNomination > 0 ? (
+                    <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                      <span>本指名会計バック</span>
+                      <span className="text-right">
+                        {localStorage.getItem(salesBackKey)} % ￥{" "}
+                        {totalSales.toLocaleString("ja-JP")}
+                      </span>
+                    </li>
+                  ) : null}
+                  {hallNomination > 0 ? (
+                    <li className="flex justify-between items-center py-2 border-b border-gray-300">
+                      <span>場内指名</span>
+                      <span className="text-right">
+                        {hallNomination} x ￥
+                        {localStorage.getItem("hallNomination")}
+                      </span>
+                    </li>
+                  ) : null}
                   {getDrinkList(eventData).map((drink, index) => (
                     <li
                       key={index}

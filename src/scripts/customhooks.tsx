@@ -32,6 +32,10 @@ export function floorNum(num: number, digit: number) {
   );
 }
 
+export function floorWage(num: number) {
+  return Math.floor(num);
+}
+
 export function useToggleButton() {
   const [selectedOption, setSelectedOption] = useState(
     localStorage.getItem(deductionAmountOptionKey)

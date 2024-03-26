@@ -69,7 +69,7 @@ export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
         </button>
       </Link>
 
-      <Link to="/salary-pwa/setting">
+      <Link to="/salary-pwa/setting" id="setting">
         <button
           className={`flex items-center gap-2 focus:outline-none transition-colors duration-300 ${
             selectedItem === "notifications" ? "text-primary" : "text-gray-600"
