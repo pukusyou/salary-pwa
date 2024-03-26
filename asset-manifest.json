@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/salary-pwa/static/css/main.ee6263fd.css",
-    "main.js": "/salary-pwa/static/js/main.31cfb138.js",
+    "main.js": "/salary-pwa/static/js/main.ff850840.js",
     "static/js/592.759b46da.chunk.js": "/salary-pwa/static/js/592.759b46da.chunk.js",
     "service-worker.js": "/salary-pwa/service-worker.js",
     "index.html": "/salary-pwa/index.html",
     "main.ee6263fd.css.map": "/salary-pwa/static/css/main.ee6263fd.css.map",
-    "main.31cfb138.js.map": "/salary-pwa/static/js/main.31cfb138.js.map",
+    "main.ff850840.js.map": "/salary-pwa/static/js/main.ff850840.js.map",
     "592.759b46da.chunk.js.map": "/salary-pwa/static/js/592.759b46da.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ee6263fd.css",
-    "static/js/main.31cfb138.js"
+    "static/js/main.ff850840.js"
   ]
 }
