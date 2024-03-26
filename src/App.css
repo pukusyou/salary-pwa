@@ -49,6 +49,9 @@ th.fc-day-sat .fc-col-header-cell-cushion {
 th.fc-day-sun .fc-col-header-cell-cushion{
   color: red;
 }
+td.fc-day {
+  border: none;
+}
 td.fc-day-sat {
   color: blue;
   background-color: #eaf4ff;
