@@ -4,19 +4,19 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
-import ServiceWorkerUpdateDialog from "./components/ServiceWorkerUpdateDialog";
+// import ServiceWorkerUpdateDialog from "./components/ServiceWorkerUpdateDialog";
 
-const sw = ReactDOM.createRoot(
-  document.getElementById("SW-update-dialog") as HTMLElement
-);
+// const sw = ReactDOM.createRoot(
+//   document.getElementById("SW-update-dialog") as HTMLElement
+// );
 
-serviceWorkerRegistration.register({
-  onUpdate: (registration) => {
-    if (registration.waiting) {
-      sw.render(<ServiceWorkerUpdateDialog registration={registration} />);
-    }
-  },
-});
+// serviceWorkerRegistration.register({
+//   onUpdate: (registration) => {
+//     if (registration.waiting) {
+//       sw.render(<ServiceWorkerUpdateDialog registration={registration} />);
+//     }
+//   },
+// });
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -30,8 +30,8 @@ root.render(
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
-// serviceWorkerRegistration.unregister();
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.unregister();
+// serviceWorkerRegistration.register();
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
