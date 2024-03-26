@@ -57,6 +57,10 @@ td.fc-day-sun {
   color: red;
   background-color: #ffeaea;
 }
+td.fc-holiday {
+  color: red;
+  background-color: #ffeaea;
+}
 .fc .fc-toolbar.fc-header-toolbar {
   margin-bottom: 0;
   height: 7%;
@@ -93,6 +97,18 @@ td.fc-day-sun {
 .fc .fc-today-button:disabled {
   opacity: 1;
 }
+.fc .fc-scrollgrid {
+  border-width: 0;
+}
+
+.fc .fc-scrollgrid-section > * {
+  border: none;
+}
+
+.fc .fc-scrollgrid-sync-table {
+  border: 1px;
+}
+
 /* .footer {
   position: fixed;
   bottom: 0;

@@ -5,6 +5,7 @@ import jaLocale from "@fullcalendar/core/locales/ja";
 import { useEffect, useState } from "react";
 import DateDrawer from "./DateDrawer";
 import eventDB from "../scripts/eventsDB";
+
 interface DrinkNames {
   name: string;
   price: number;
@@ -56,11 +57,36 @@ function Calendar() {
     setDate(info.date);
     setOpen(true);
   };
+  const eventClick = (info: any) => {
+    setDate(info.event.start);
+    setOpen(true);
+  };
   useEffect(() => {
     getWorkTime().then((result: any) => {
       setEvents(result);
     });
   }, [open]);
+  // jsonをapiから取得
+  fetch("https://holidays-jp.github.io/api/v1/date.json")
+    .then((response) => {
+      return response.json();
+    })
+    .then((json) => {
+      // classに"fc-day"が付与された要素をすべて取得
+      const dayElements = document.getElementsByClassName("fc-day");
+      // 取得した要素を配列に変換
+      const dayArray = Array.from(dayElements);
+      // 配列の要素を1つずつ処理
+      dayArray.forEach((element) => {
+        // "data-date"属性の値を取得
+        const date = element.getAttribute("data-date");
+        // 取得した日付が祝日の場合
+        if (date && json[date]) {
+          // 要素に"holiday"クラスを追加
+          element.classList.add("fc-holiday");
+        }
+      });
+    });
   return (
     <>
       <FullCalendar
@@ -68,8 +94,18 @@ function Calendar() {
         locales={[jaLocale]}
         locale="ja"
         dateClick={dateClick}
-        height={"92%"}
+        eventClick={eventClick}
+        height={"100%"}
         events={events}
+        timeZone="Asia/Tokyo"
+        headerToolbar={{
+          start: "prev",
+          center: "title",
+          end: "next",
+        }}
+        dayCellContent={(arg) => {
+          return arg.date.getDate();
+        }}
       />
       <DateDrawer open={open} setOpen={setOpen} date={date} />
     </>

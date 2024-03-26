@@ -18,7 +18,7 @@ export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
   };
 
   return (
-    <div className="bg-gray-800 text-white py-4 px-6 flex justify-around items-center bottom-0 w-full footer">
+    <div className="bg-gray-800 text-white py-4 px-6 flex justify-around items-center bottom-0 w-full footer h-24 text-xl">
       <Link to="/salary-pwa/">
         <button
           className={`flex items-center gap-2 focus:outline-none transition-colors duration-300 ${
