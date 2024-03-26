@@ -34,7 +34,6 @@ function App() {
   if (localStorage.getItem("hourlyRate") === null) {
     run = true;
   }
-  console.log(run);
   return (
     <div className="App all">
       <Joyride

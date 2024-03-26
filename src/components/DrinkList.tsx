@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import drinkDB from "../scripts/drinksDB";
+import { useAlert } from "../scripts/customhooks";
 
 interface Drink {
   name: string;
@@ -20,6 +21,7 @@ function deleteIndexedDB(name: string) {
 
 const DrinkList: React.FC = () => {
   const [drinks, setDrinks] = useState<Drink[]>([]);
+  const { alert, handleAlertOpen } = useAlert();
   useEffect(() => {
     var drinkData: Drink[] = [];
     drinkDB.getAllDrinksRecord().then((result: any) => {
@@ -56,11 +58,26 @@ const DrinkList: React.FC = () => {
   };
 
   const handleComplete = () => {
-    saveIndexedDB(drinks);
+    // drinksのnameが空のものがあった場合は削除
+    const newDrinks = drinks.filter((drink) => drink.name !== "");
+    // drinksのnameが重複していた場合は削除
+    const nameSet = new Set();
+    for (var key in newDrinks) {
+      if (nameSet.has(newDrinks[key].name)) {
+        handleAlertOpen("エラー", "名称が重複しています");
+        return;
+      }
+      nameSet.add(newDrinks[key].name);
+    }
+    saveIndexedDB(newDrinks);
+    setDrinks(newDrinks);
+
+    handleAlertOpen("保存しました", "");
   };
 
   return (
     <div className="mx-auto mt-8 max-w-screen-sm">
+      {alert}
       {drinks.map((drink, index) => (
         <div
           key={index}
@@ -142,7 +159,7 @@ const DrinkList: React.FC = () => {
         onClick={handleComplete}
         className="border rounded px-2 py-1 bg-blue-500 text-white"
       >
-        完了
+        保存
       </button>
     </div>
   );
