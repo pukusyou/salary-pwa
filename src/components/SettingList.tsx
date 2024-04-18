@@ -3,7 +3,8 @@ import { Link } from "react-router-dom"; // react-router-dom から Link コン�
 import eventDB from "../scripts/eventsDB";
 function resetDB() {
   eventDB.deleteDB();
-  alert("イベント登録をリセットしました");
+  localStorage.clear();
+  alert("すべての情報リセットしました");
   window.location.reload();
 }
 
