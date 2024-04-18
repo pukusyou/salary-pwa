@@ -3,23 +3,22 @@ import { useAlert } from "../scripts/customhooks";
 
 const CutoffDatePage = () => {
   const { alert, handleAlertOpen } = useAlert();
-  const [selectedDay, setSelectedDay] = useState(
-    localStorage.getItem("cutoffDate") || "-1"
-  );
+  const [selectedDays, setSelectedDays] = useState<string[]>(() => {
+    const storedDates = localStorage.getItem("cutoffDates");
+    return storedDates ? JSON.parse(storedDates) : [];
+  });
 
-  const handleDayChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    if (Number(e.target.value) >= 0) {
-      localStorage.setItem("cutoffDate", String(e.target.value));
-      setSelectedDay(e.target.value);
-    }
+  const handleDayChange = (day: string) => {
+    const updatedDays = selectedDays.includes(day)
+      ? selectedDays.filter((d) => d !== day)
+      : [...selectedDays, day].slice(0, 2); // Maximum of 2 dates
+    localStorage.setItem("cutoffDates", JSON.stringify(updatedDays));
+    setSelectedDays(updatedDays);
   };
 
   const handleSubmit = () => {
-    if (selectedDay === "-1") {
-      handleAlertOpen("締め日を選択してください", "");
-      return;
+    if (selectedDays.length === 0) {
+      handleAlertOpen("少なくとも1つの締め日を選択してください", "");
     } else {
       handleAlertOpen("保存しました", "");
     }
@@ -31,35 +30,34 @@ const CutoffDatePage = () => {
         {alert}
         <h1 className="text-2xl font-semibold mb-4">締め日設定</h1>
         <div className="mb-6">
-          <label
-            htmlFor="cutoffDate"
-            className="block text-sm font-medium text-gray-700"
-          >
-            締め日を選択してください
-          </label>
-          <select
-            id="cutoffDate"
-            value={selectedDay}
-            onChange={handleDayChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          >
-            <option value={-1}>選択してください</option>
-            {[...Array(30)].map((_, index) => (
-              <option key={index + 1} value={index + 1}>
-                {index + 1}日
-              </option>
-            ))}
-            <option value={0}>月末</option>
-          </select>
-        </div>
-        <div className="flex justify-end">
+          {[...Array(30)].map((_, i) => (
+            <button
+              key={i + 1}
+              className={`m-1 p-2 ${
+                selectedDays.includes(String(i + 1))
+                  ? "bg-blue-500"
+                  : "bg-gray-200"
+              }`}
+              onClick={() => handleDayChange(String(i + 1))}
+            >
+              {i + 1}日
+            </button>
+          ))}
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-            onClick={handleSubmit}
+            className={`m-1 p-2 ${
+              selectedDays.includes("32") ? "bg-blue-500" : "bg-gray-200"
+            }`}
+            onClick={() => handleDayChange("32")}
           >
-            保存
+            月末
           </button>
         </div>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={handleSubmit}
+        >
+          保存
+        </button>
       </div>
     </div>
   );

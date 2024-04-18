@@ -78,7 +78,6 @@ export function useDeducationAmountPercent(defaultValue: string | null) {
   const handleDeductionAmountPercentChange = (e: {
     target: { value: any };
   }) => {
-    console.log(e.target.value.replace(/,/g, "").slice(-1));
     if (
       isNaN(Number(e.target.value.replace(/,/g, ""))) &&
       e.target.value.replace(/,/g, "").slice(-1) !== "."

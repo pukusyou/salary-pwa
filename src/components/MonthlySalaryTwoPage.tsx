@@ -25,22 +25,48 @@ const deductionAmountPercentKey: string = "deductionAmountPercent";
 const deductionAmountOptionKey: string = "deductionAmountOption";
 const salesBackOptionKey: string = "bookNominationBack";
 
-function loadEventIndexedDB(date: Date, cutoffDate: number) {
+function loadEventIndexedDB(
+  date: Date,
+  cutoffDates: number[],
+  isFirst: boolean
+) {
   var monthlyEventData: EventData[] = [];
   var oneMonthAgo: Date;
-  var endDate = new Date(date.getFullYear(), date.getMonth(), cutoffDate);
-  if (date.getMonth() === 0) {
-    oneMonthAgo = new Date(
-      date.getFullYear() - 1,
-      11, // 12月
-      cutoffDate
-    );
-  } else if (cutoffDate === 32) {
-    oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), 0);
-    endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  var endDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    isFirst ? cutoffDates[0] : cutoffDates[1]
+  );
+  if (isFirst) {
+    // 前期の場合
+    if (date.getMonth() === 0) {
+      oneMonthAgo = new Date(
+        date.getFullYear() - 1,
+        11, // 12月
+        cutoffDates[1] + 1
+      );
+    } else if (cutoffDates[1] === 32) {
+      oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), 1);
+      endDate = new Date(date.getFullYear(), date.getMonth(), cutoffDates[0]);
+    } else {
+      oneMonthAgo = new Date(
+        date.getFullYear(),
+        date.getMonth() - 1,
+        cutoffDates[1] + 1
+      );
+    }
   } else {
-    oneMonthAgo = new Date(date.getFullYear(), date.getMonth() - 1, cutoffDate);
+    // 後期の場合
+    if (cutoffDates[1] === 32) {
+      endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+    oneMonthAgo = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      cutoffDates[0] + 1
+    );
   }
+
   return eventDB.getAllEventsRecord().then((result: any) => {
     for (var key in result) {
       var startDate: Date = new Date(result[key].start);
@@ -69,8 +95,9 @@ function getDeduction(salary: number) {
   return Math.floor(result);
 }
 
-const MonthlySalaryPage = ({ cutoffDate }: { cutoffDate: number }) => {
+const MonthlySalaryTwoPage = ({ cutoffDates }: { cutoffDates: number[] }) => {
   const [open, setOpen] = useState(false);
+  const [isFirst, setIsFirst] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [monthlyData, setMonthlyData] = useState({
     totalSalary: 0,
@@ -85,72 +112,74 @@ const MonthlySalaryPage = ({ cutoffDate }: { cutoffDate: number }) => {
   });
   const [eventData, setEventData] = useState<EventData[]>([]);
   useEffect(() => {
-    loadEventIndexedDB(selectedDate, cutoffDate).then((result: any) => {
-      setEventData(result);
-      var totalSalary = 0;
-      var hourlyWage = Number(localStorage.getItem("hourlyRate"));
-      let bookNomination = Number(localStorage.getItem("bookNomination"));
-      let hallNomination = Number(localStorage.getItem("hallNomination"));
-      var workingHours = 0;
-      var drinkSales = 0;
-      var totalDeduction = 0;
-      var totalHourlyWage = 0;
-      var totalNomination = 0;
-      var totalBookNomination = 0;
-      var totalSalesBack = 0;
-      var totalHallNomination = 0;
-      for (var key in result) {
-        var dailySalary = 0;
-        var dailyNomination = 0;
-        var dailyDrinkSales = 0;
-        var dailySales: number[] = [];
-        var elapsed =
-          new Date(result[key].end).getTime() -
-          new Date(result[key].start).getTime();
-        var elapsedHours = elapsed / (1000 * 60 * 60);
-        workingHours += elapsedHours;
-        for (var key2 in result[key].drinks) {
-          dailyDrinkSales +=
-            result[key].drinks[key2].price * result[key].drinks[key2].value;
+    loadEventIndexedDB(selectedDate, cutoffDates, isFirst).then(
+      (result: any) => {
+        setEventData(result);
+        var totalSalary = 0;
+        var hourlyWage = Number(localStorage.getItem("hourlyRate"));
+        let bookNomination = Number(localStorage.getItem("bookNomination"));
+        let hallNomination = Number(localStorage.getItem("hallNomination"));
+        var workingHours = 0;
+        var drinkSales = 0;
+        var totalDeduction = 0;
+        var totalHourlyWage = 0;
+        var totalNomination = 0;
+        var totalBookNomination = 0;
+        var totalSalesBack = 0;
+        var totalHallNomination = 0;
+        for (var key in result) {
+          var dailySalary = 0;
+          var dailyNomination = 0;
+          var dailyDrinkSales = 0;
+          var dailySales: number[] = [];
+          var elapsed =
+            new Date(result[key].end).getTime() -
+            new Date(result[key].start).getTime();
+          var elapsedHours = elapsed / (1000 * 60 * 60);
+          workingHours += elapsedHours;
+          for (var key2 in result[key].drinks) {
+            dailyDrinkSales +=
+              result[key].drinks[key2].price * result[key].drinks[key2].value;
+          }
+          dailySales = result[key].sales;
+          dailyNomination += result[key].bookNomination * bookNomination;
+          dailyNomination += result[key].hallNomination * hallNomination;
+          totalBookNomination += result[key].bookNomination;
+          totalHallNomination += result[key].hallNomination;
+
+          dailySalary += dailyNomination;
+          dailySalary += elapsedHours * hourlyWage;
+          dailySalary += dailyDrinkSales;
+          let dailySalesBack =
+            localStorage.getItem(salesBackOptionKey) === "true"
+              ? getBookNominationBack(dailySales)
+              : 0;
+          dailySalary += dailySalesBack;
+          var deduction = getDeduction(dailySalary);
+          totalDeduction += deduction;
+          totalSalary += dailySalary;
+          totalSalary -= deduction;
+          totalSalesBack += dailySalesBack;
+          totalNomination += dailyNomination;
+          drinkSales += dailyDrinkSales;
+          totalHourlyWage += elapsedHours * hourlyWage;
         }
-        dailySales = result[key].sales;
-        dailyNomination += result[key].bookNomination * bookNomination;
-        dailyNomination += result[key].hallNomination * hallNomination;
-        totalBookNomination += result[key].bookNomination;
-        totalHallNomination += result[key].hallNomination;
 
-        dailySalary += dailyNomination;
-        dailySalary += elapsedHours * hourlyWage;
-        dailySalary += dailyDrinkSales;
-        let dailySalesBack =
-          localStorage.getItem(salesBackOptionKey) === "true"
-            ? getBookNominationBack(dailySales)
-            : 0;
-        dailySalary += dailySalesBack;
-        var deduction = getDeduction(dailySalary);
-        totalDeduction += deduction;
-        totalSalary += dailySalary;
-        totalSalary -= deduction;
-        totalSalesBack += dailySalesBack;
-        totalNomination += dailyNomination;
-        drinkSales += dailyDrinkSales;
-        totalHourlyWage += elapsedHours * hourlyWage;
+        // totalHourlyWage = hourlyWage * workingHours;
+        setMonthlyData({
+          totalSalary: totalSalary,
+          totalHourlyWage: totalHourlyWage,
+          totalDeduction: totalDeduction,
+          workingHours: workingHours,
+          drinkSales: drinkSales,
+          totalNomination: totalNomination,
+          totalBookNomination: totalBookNomination,
+          totalHallNomination: totalHallNomination,
+          totalSalesBack: totalSalesBack,
+        });
       }
-
-      // totalHourlyWage = hourlyWage * workingHours;
-      setMonthlyData({
-        totalSalary: totalSalary,
-        totalHourlyWage: totalHourlyWage,
-        totalDeduction: totalDeduction,
-        workingHours: workingHours,
-        drinkSales: drinkSales,
-        totalNomination: totalNomination,
-        totalBookNomination: totalBookNomination,
-        totalHallNomination: totalHallNomination,
-        totalSalesBack: totalSalesBack,
-      });
-    });
-  }, [cutoffDate, selectedDate]);
+    );
+  }, [selectedDate, isFirst, cutoffDates]);
 
   // 円グラフのデータ
   const chartData = {
@@ -170,13 +199,23 @@ const MonthlySalaryPage = ({ cutoffDate }: { cutoffDate: number }) => {
 
   function handleLeftButtonClick(): void {
     const newDate = new Date(selectedDate);
-    newDate.setMonth(newDate.getMonth() - 1);
+    if (isFirst) {
+      newDate.setMonth(newDate.getMonth() - 1);
+      setIsFirst(false);
+    } else {
+      setIsFirst(true);
+    }
     setSelectedDate(newDate);
   }
 
   function handleRightButtonClick(): void {
     const newDate = new Date(selectedDate);
-    newDate.setMonth(newDate.getMonth() + 1);
+    if (isFirst) {
+      setIsFirst(false);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+      setIsFirst(true);
+    }
     setSelectedDate(newDate);
   }
 
@@ -218,7 +257,7 @@ const MonthlySalaryPage = ({ cutoffDate }: { cutoffDate: number }) => {
         </button>
         <h1 className="text-2xl font-semibold m-1">
           {selectedDate.getFullYear()}年{selectedDate.getMonth() + 1}
-          月度
+          月度 {isFirst ? "前期" : "後期"}
         </h1>
         <button
           className="hover:text-blue-600"
@@ -293,4 +332,4 @@ const MonthlySalaryPage = ({ cutoffDate }: { cutoffDate: number }) => {
   );
 };
 
-export default MonthlySalaryPage;
+export default MonthlySalaryTwoPage;

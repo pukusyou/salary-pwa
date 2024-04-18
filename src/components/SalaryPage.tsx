@@ -1,11 +1,17 @@
 import React from "react";
 import "chart.js/auto";
 import MonthlySalaryPage from "./MonthlySalaryPage";
+import MonthlySalaryTwoPage from "./MonthlySalaryTwoPage";
 // import YearlySalaryPage from "./YearlySalaryPage";
 
 const SalaryPage = () => {
   //   const [selectedOption, setSelectedOption] = useState(1);
-
+  let string = localStorage.getItem("cutoffDates");
+  let cutoffDates = string ? JSON.parse(string) : [];
+  // 配列の要素を数値に変換
+  cutoffDates = cutoffDates.map((date: string) => Number(date));
+  // 昇順にソート
+  cutoffDates.sort((a: number, b: number) => a - b);
   return (
     <div className="flex flex-col items-center p-4">
       {/* 画面上部 */}
@@ -34,7 +40,12 @@ const SalaryPage = () => {
         </div> */}
       {/* </div> */}
       {/* {selectedOption === 1 ? <MonthlySalaryPage /> : <YearlySalaryPage />} */}
-      <MonthlySalaryPage />
+
+      {cutoffDates.length === 1 ? (
+        <MonthlySalaryPage cutoffDate={cutoffDates[0]} />
+      ) : (
+        <MonthlySalaryTwoPage cutoffDates={cutoffDates} />
+      )}
     </div>
   );
 };

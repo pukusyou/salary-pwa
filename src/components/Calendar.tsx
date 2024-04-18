@@ -97,7 +97,7 @@ function Calendar() {
         eventClick={eventClick}
         height={"100%"}
         events={events}
-        timeZone="Asia/Tokyo"
+        // timeZone="Asia/Tokyo"
         headerToolbar={{
           start: "prev",
           center: "title",
