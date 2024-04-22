@@ -4,7 +4,7 @@ import Joyride from "react-joyride";
 
 import { Step } from "react-joyride";
 
-export const steps: Step[] = [
+const steps: Step[] = [
   {
     target: "#setting",
     content: "初めに設定を行いましょう",

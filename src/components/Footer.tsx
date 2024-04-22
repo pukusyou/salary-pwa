@@ -8,14 +8,22 @@ type FooterProps = {
 
 export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
   const handleItemClick = (item: string) => {
-    if (item === "notifications") {
-      // Redirect to settings
-      // window.location.href = '/salary-pwa/setting';
-      setSelectedItem(item);
-    } else {
-      setSelectedItem(item);
-    }
+    setSelectedItem(item);
   };
+  React.useEffect(() => {
+    const currentUrl = window.location.pathname;
+    let selectedItem = "";
+
+    if (currentUrl === "/") {
+      selectedItem = "home";
+    } else if (currentUrl === "/salary") {
+      selectedItem = "search";
+    } else if (currentUrl === "/setting") {
+      selectedItem = "notifications";
+    }
+
+    setSelectedItem(selectedItem);
+  }, [setSelectedItem]);
 
   return (
     <div className="bg-gray-800 text-white py-4 px-6 flex justify-around items-center bottom-0 w-full footer h-24 text-xl">
