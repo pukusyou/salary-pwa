@@ -19,7 +19,7 @@ export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
 
   return (
     <div className="bg-gray-800 text-white py-4 px-6 flex justify-around items-center bottom-0 w-full footer h-24 text-xl">
-      <Link to="/salary-pwa/">
+      <Link to="/">
         <button
           className={`flex items-center gap-2 focus:outline-none transition-colors duration-300 ${
             selectedItem === "home" ? "text-primary" : "text-gray-600"
@@ -44,7 +44,7 @@ export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
         </button>
       </Link>
 
-      <Link to="/salary-pwa/salary">
+      <Link to="/salary">
         <button
           className={`flex items-center gap-2 focus:outline-none transition-colors duration-300 ${
             selectedItem === "search" ? "text-primary" : "text-gray-600"
@@ -69,7 +69,7 @@ export default function Footer({ selectedItem, setSelectedItem }: FooterProps) {
         </button>
       </Link>
 
-      <Link to="/salary-pwa/setting" id="setting">
+      <Link to="/setting" id="setting">
         <button
           className={`flex items-center gap-2 focus:outline-none transition-colors duration-300 ${
             selectedItem === "notifications" ? "text-primary" : "text-gray-600"
