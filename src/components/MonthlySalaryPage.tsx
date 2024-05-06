@@ -29,6 +29,7 @@ function loadEventIndexedDB(date: Date, cutoffDate: number) {
   var monthlyEventData: EventData[] = [];
   var oneMonthAgo: Date;
   var endDate = new Date(date.getFullYear(), date.getMonth(), cutoffDate);
+  endDate.setDate(endDate.getDate() + 1);
   if (date.getMonth() === 0) {
     oneMonthAgo = new Date(
       date.getFullYear() - 1,
@@ -37,14 +38,15 @@ function loadEventIndexedDB(date: Date, cutoffDate: number) {
     );
   } else if (cutoffDate === 32) {
     oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), 0);
-    endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
   } else {
     oneMonthAgo = new Date(date.getFullYear(), date.getMonth() - 1, cutoffDate);
   }
+  oneMonthAgo.setDate(oneMonthAgo.getDate() + 1);
   return eventDB.getAllEventsRecord().then((result: any) => {
     for (var key in result) {
       var startDate: Date = new Date(result[key].start);
-      if (startDate > oneMonthAgo && startDate <= endDate) {
+      if (startDate >= oneMonthAgo && startDate < endDate) {
         monthlyEventData.push(result[key]);
       }
     }

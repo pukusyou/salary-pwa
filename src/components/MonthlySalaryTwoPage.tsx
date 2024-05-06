@@ -46,13 +46,13 @@ function loadEventIndexedDB(
         cutoffDates[1] + 1
       );
     } else if (cutoffDates[1] === 32) {
-      oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), 1);
+      oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), 0);
       endDate = new Date(date.getFullYear(), date.getMonth(), cutoffDates[0]);
     } else {
       oneMonthAgo = new Date(
         date.getFullYear(),
         date.getMonth() - 1,
-        cutoffDates[1] + 1
+        cutoffDates[1]
       );
     }
   } else {
@@ -60,17 +60,14 @@ function loadEventIndexedDB(
     if (cutoffDates[1] === 32) {
       endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     }
-    oneMonthAgo = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      cutoffDates[0] + 1
-    );
+    oneMonthAgo = new Date(date.getFullYear(), date.getMonth(), cutoffDates[0]);
   }
-
+  oneMonthAgo.setDate(oneMonthAgo.getDate() + 1);
+  endDate.setDate(endDate.getDate() + 1);
   return eventDB.getAllEventsRecord().then((result: any) => {
     for (var key in result) {
       var startDate: Date = new Date(result[key].start);
-      if (startDate > oneMonthAgo && startDate <= endDate) {
+      if (startDate >= oneMonthAgo && startDate < endDate) {
         monthlyEventData.push(result[key]);
       }
     }
